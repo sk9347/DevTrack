@@ -31,6 +31,8 @@ node scripts/seed-demo.mjs       # optional: demo@devtrack.dev / correct-horse w
 
 Host port is 5434 (not 5433 as in the PDF) because 5433 is commonly taken by a local PostgreSQL.
 
+Already running PostgreSQL? Skip `pnpm db:up`, run `CREATE DATABASE devtrack;` on it, and set `DATABASE_URL` in `apps/api/.env` to that server (for example `postgresql://USER:PASSWORD@localhost:5433/devtrack?schema=public`). `.env` is gitignored, so credentials stay local. The API tests use their own `devtrack_test` database from `apps/api/.env.test`.
+
 ## Tests
 
 ```bash

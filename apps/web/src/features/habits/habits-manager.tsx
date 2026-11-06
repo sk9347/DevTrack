@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Button, EmptyState, ErrorText, Field, LoadError, Skeleton, TextInput } from '@/components/ui/controls';
+import { Button, EmptyState, ErrorText, Field, LoadError, Panel, Skeleton, TextInput } from '@/components/ui/controls';
 import { api, notifyMutated } from '@/lib/api-client';
 import { formatMinutes } from '@/lib/format';
 import { useFetch } from '@/lib/use-fetch';
@@ -21,11 +21,14 @@ export function validateHabit(name: string, dailyTargetMinutes: string, targetFr
 
 function ColorChoice({ value, onChange, name }: { value: string; onChange: (c: string) => void; name: string }) {
   return (
-    <div className="flex gap-1">
+    <div className="flex flex-wrap gap-1">
       {HABIT_COLORS.map((c) => (
-        <label key={c} className="flex size-11 cursor-pointer items-center justify-center">
+        <label key={c} className="flex size-11 cursor-pointer items-center justify-center rounded-lg">
           <input type="radio" name={name} value={c} checked={value === c} onChange={() => onChange(c)} className="peer sr-only" aria-label={c} />
-          <span className="size-6 rounded-full ring-offset-2 ring-offset-canvas transition-shadow duration-150 peer-checked:ring-2 peer-checked:ring-fg peer-focus-visible:ring-2 peer-focus-visible:ring-accent" style={{ backgroundColor: c }} />
+          <span
+            className="size-6 rounded-full ring-offset-2 ring-offset-surface transition-shadow duration-150 peer-checked:ring-2 peer-checked:ring-fg peer-focus-visible:ring-2 peer-focus-visible:ring-accent"
+            style={{ backgroundColor: c }}
+          />
         </label>
       ))}
     </div>
@@ -56,7 +59,7 @@ function EditHabit({ habit, onDone }: { habit: Habit; onDone: () => void }) {
   }
 
   return (
-    <form onSubmit={save} noValidate aria-label={`Edit ${habit.name}`} className="w-full space-y-3 py-3">
+    <form onSubmit={save} noValidate aria-label={`Edit ${habit.name}`} className="w-full space-y-3 rounded-lg border border-line bg-surface-secondary p-4">
       <Field label="Name">
         <TextInput value={name} onChange={(e) => setName(e.target.value)} maxLength={60} />
       </Field>
@@ -69,7 +72,7 @@ function EditHabit({ habit, onDone }: { habit: Habit; onDone: () => void }) {
         </Field>
       </div>
       <ColorChoice value={color} onChange={setColor} name={`color-${habit.id}`} />
-      <p className="text-xs text-muted">New targets apply to every day, including past ones.</p>
+      <p className="text-xs leading-5 text-muted">New targets apply to every day, including past ones.</p>
       <ErrorText>{error}</ErrorText>
       <div className="flex gap-2">
         <Button type="submit" variant="primary" disabled={busy}>
@@ -121,82 +124,86 @@ export function HabitsManager() {
   }
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[1fr_20rem]">
-      <section aria-labelledby="habit-list">
-        <h2 id="habit-list" className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
-          Active habits
-        </h2>
-        {loading && !habits ? (
-          <Skeleton className="h-24" />
-        ) : loadError ? (
-          <LoadError what="your habits" message={loadError} onRetry={() => void reload()} />
-        ) : habits && habits.length > 0 ? (
-          <ul className="divide-y divide-line border-y border-line">
-            {habits.map((h) =>
-              editing === h.id ? (
-                <li key={h.id} className="flex items-center gap-3">
-                  <EditHabit habit={h} onDone={() => setEditing(null)} />
-                </li>
-              ) : (
-                <li key={h.id} className="flex min-h-14 items-center gap-3 py-2">
-                  <span className="size-3 shrink-0 rounded-full" style={{ backgroundColor: h.color }} aria-hidden />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{h.name}</p>
-                    <p className="text-sm text-muted">
-                      <span className="num">{formatMinutes(h.dailyTargetMinutes)}</span> a day, <span className="num">{h.targetFrequency}</span> days a week
-                    </p>
-                  </div>
-                  {confirming === h.id ? (
-                    <div className="flex gap-1">
-                      <Button variant="danger" onClick={() => archive(h.id)}>
-                        Confirm archive
-                      </Button>
-                      <Button variant="ghost" onClick={() => setConfirming(null)}>
-                        Keep
-                      </Button>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <Panel className="self-start">
+        <section aria-labelledby="habit-list">
+          <h2 id="habit-list" className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+            Active habits
+          </h2>
+          {loading && !habits ? (
+            <Skeleton className="h-24" />
+          ) : loadError ? (
+            <LoadError what="your habits" message={loadError} onRetry={() => void reload()} />
+          ) : habits && habits.length > 0 ? (
+            <ul className="divide-y divide-line">
+              {habits.map((h) =>
+                editing === h.id ? (
+                  <li key={h.id} className="py-3">
+                    <EditHabit habit={h} onDone={() => setEditing(null)} />
+                  </li>
+                ) : (
+                  <li key={h.id} className="flex min-h-16 flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0">
+                    <span className="size-3 shrink-0 rounded-full" style={{ backgroundColor: h.color }} aria-hidden />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{h.name}</p>
+                      <p className="text-sm text-muted">
+                        <span className="num">{formatMinutes(h.dailyTargetMinutes)}</span> a day, <span className="num">{h.targetFrequency}</span> days a week
+                      </p>
                     </div>
-                  ) : (
-                    <div className="flex gap-1">
-                      <Button variant="ghost" onClick={() => setEditing(h.id)} aria-label={`Edit ${h.name}`}>
-                        Edit
-                      </Button>
-                      <Button variant="ghost" onClick={() => setConfirming(h.id)} aria-label={`Archive ${h.name}`}>
-                        Archive
-                      </Button>
-                    </div>
-                  )}
-                </li>
-              ),
-            )}
-          </ul>
-        ) : (
-          <EmptyState title="No habits yet">Add a habit like DSA or System Design, then log study time against it.</EmptyState>
-        )}
-        <p className="mt-3 text-sm text-muted">Archived habits keep their past study time in your history.</p>
-      </section>
+                    {confirming === h.id ? (
+                      <div className="flex gap-1">
+                        <Button variant="danger" onClick={() => archive(h.id)}>
+                          Confirm archive
+                        </Button>
+                        <Button variant="ghost" onClick={() => setConfirming(null)}>
+                          Keep
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-1">
+                        <Button variant="ghost" onClick={() => setEditing(h.id)} aria-label={`Edit ${h.name}`}>
+                          Edit
+                        </Button>
+                        <Button variant="ghost" onClick={() => setConfirming(h.id)} aria-label={`Archive ${h.name}`}>
+                          Archive
+                        </Button>
+                      </div>
+                    )}
+                  </li>
+                ),
+              )}
+            </ul>
+          ) : (
+            <EmptyState title="No habits yet">Add a habit like DSA or System Design, then log study time against it.</EmptyState>
+          )}
+          <p className="mt-3 text-sm text-muted">Archived habits keep their past study time in your history.</p>
+        </section>
+      </Panel>
 
-      <form onSubmit={add} className="space-y-4" noValidate aria-label="Add a habit">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted">New habit</h2>
-        <Field label="Name">
-          <TextInput value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder="e.g. System Design" />
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Minutes a day" hint="Counts the day as met">
-            <TextInput type="number" inputMode="numeric" min={5} max={720} value={dailyTargetMinutes} onChange={(e) => setDaily(e.target.value)} />
+      <Panel className="self-start">
+        <form onSubmit={add} className="space-y-4" noValidate aria-label="Add a habit">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">New habit</h2>
+          <Field label="Name">
+            <TextInput value={name} onChange={(e) => setName(e.target.value)} maxLength={60} placeholder="e.g. System Design" />
           </Field>
-          <Field label="Days a week">
-            <TextInput type="number" inputMode="numeric" min={1} max={7} value={targetFrequency} onChange={(e) => setFreq(e.target.value)} />
-          </Field>
-        </div>
-        <fieldset>
-          <legend className="mb-1.5 text-sm font-medium">Colour</legend>
-          <ColorChoice value={color} onChange={setColor} name="color" />
-        </fieldset>
-        <ErrorText>{error}</ErrorText>
-        <Button type="submit" variant="primary" className="w-full">
-          Add habit
-        </Button>
-      </form>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Minutes a day" hint="Counts the day as met">
+              <TextInput type="number" inputMode="numeric" min={5} max={720} value={dailyTargetMinutes} onChange={(e) => setDaily(e.target.value)} />
+            </Field>
+            <Field label="Days a week">
+              <TextInput type="number" inputMode="numeric" min={1} max={7} value={targetFrequency} onChange={(e) => setFreq(e.target.value)} />
+            </Field>
+          </div>
+          <fieldset>
+            <legend className="mb-1.5 text-sm font-medium">Colour</legend>
+            <ColorChoice value={color} onChange={setColor} name="color" />
+          </fieldset>
+          <ErrorText>{error}</ErrorText>
+          <Button type="submit" variant="primary" className="w-full">
+            Add habit
+          </Button>
+        </form>
+      </Panel>
     </div>
   );
 }

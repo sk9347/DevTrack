@@ -25,18 +25,18 @@ export function DayDetail({ track, timeZone }: { track: DayTrack; timeZone?: str
 
   return (
     <section aria-label={`Details for ${formatDayLong(track.date)}`}>
-      <div className="flex items-baseline justify-between gap-4">
-        <h2 className="text-lg font-semibold">{formatDayLong(track.date)}</h2>
-        <p className="tabular-nums text-muted">{formatMinutes(track.totalMinutes)} studied</p>
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 className="text-lg font-semibold tracking-tight">{formatDayLong(track.date)}</h2>
+        <p className="tabular-nums text-sm text-muted">{formatMinutes(track.totalMinutes)} studied</p>
       </div>
 
-      <h3 className="mb-2 mt-6 text-sm font-semibold uppercase tracking-wide text-muted">Sessions</h3>
+      <h3 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-[0.14em] text-muted">Sessions</h3>
       {track.sessions.length === 0 ? (
         <EmptyState title="No study logged this day">Past days stay as they are. Earlier work is never erased.</EmptyState>
       ) : (
-        <ul className="divide-y divide-line border-y border-line">
+        <ul className="divide-y divide-line">
           {track.sessions.map((s) => (
-            <li key={s.id} className="flex min-h-12 items-center gap-3 py-2">
+            <li key={s.id} className="flex min-h-14 flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0">
               <span className="size-3 shrink-0 rounded-full" style={{ backgroundColor: s.habitColor }} aria-hidden />
               <div className="min-w-0 flex-1">
                 <p className="truncate">
@@ -58,7 +58,7 @@ export function DayDetail({ track, timeZone }: { track: DayTrack; timeZone?: str
                   </Button>
                 </div>
               ) : (
-                <Button variant="ghost" onClick={() => setConfirming(s.id)} aria-label={`Delete ${s.habitName} session, ${formatMinutes(s.durationMinutes)}`}>
+                <Button variant="ghost" className="px-3" onClick={() => setConfirming(s.id)} aria-label={`Delete ${s.habitName} session, ${formatMinutes(s.durationMinutes)}`}>
                   Delete
                 </Button>
               )}
@@ -70,10 +70,10 @@ export function DayDetail({ track, timeZone }: { track: DayTrack; timeZone?: str
 
       {track.tasks.length > 0 && (
         <>
-          <h3 className="mb-2 mt-6 text-sm font-semibold uppercase tracking-wide text-muted">Tasks</h3>
-          <ul className="divide-y divide-line border-y border-line">
+          <h3 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-[0.14em] text-muted">Tasks</h3>
+          <ul className="divide-y divide-line">
             {track.tasks.map((t) => (
-              <li key={t.id} className="flex min-h-11 items-center justify-between gap-3 py-2">
+              <li key={t.id} className="flex min-h-11 items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
                 <span className={t.status === 'DONE' ? 'text-muted line-through' : ''}>{t.title}</span>
                 <span className="text-sm text-muted">{t.status === 'DONE' ? 'Done' : 'Not done'}</span>
               </li>

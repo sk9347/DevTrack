@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { DayBars } from '@/components/charts/day-bars';
 import { Heatmap } from '@/components/charts/heatmap';
-import { Button, Region, SectionHeading } from '@/components/ui/controls';
+import { Button, PageHeader, Panel, Region, SectionHeading } from '@/components/ui/controls';
 import { FirstRun } from '@/features/dashboard/first-run';
 import { HabitProgress } from '@/features/dashboard/habit-progress';
 import { StatRow } from '@/features/dashboard/stat-row';
@@ -36,16 +36,19 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">Today</h1>
-        {!firstRun && (
-          <Button variant="primary" onClick={() => setLogging({})} disabled={!day.data}>
-            Log study time
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Today"
+        description="What you're studying today, and how the week is adding up."
+        actions={
+          !firstRun ? (
+            <Button variant="primary" onClick={() => setLogging({})} disabled={!day.data}>
+              Log study time
+            </Button>
+          ) : undefined
+        }
+      />
 
-      <p role="status" className="mt-3 min-h-5 text-sm text-muted">
+      <p role="status" className="mb-4 min-h-5 text-sm text-muted">
         {confirmed &&
           logged &&
           (confirmed.minutes >= logged.before + logged.minutes
@@ -56,67 +59,79 @@ export default function DashboardPage() {
       {firstRun ? (
         <FirstRun />
       ) : (
-        <>
-          <div className="mt-4 grid gap-10 lg:grid-cols-2">
+        <div className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-2">
             <section aria-labelledby="today-habits" className="min-w-0">
-              <SectionHeading>
-                <span id="today-habits">Habits today</span>
-              </SectionHeading>
-              <Region state={day} what="today's habits" skeleton="h-32">
-                {(d) => <HabitProgress
-                    habits={d.habits}
-                    onLog={(habitId) => setLogging({ habitId })}
-                    onStart={(habitId) => {
-                      const h = d.habits.find((x) => x.id === habitId);
-                      if (h) start({ id: h.id, name: h.name });
-                    }}
-                    timerHabitId={timer?.habitId}
-                  />}
-              </Region>
+              <Panel className="h-full">
+                <SectionHeading>
+                  <span id="today-habits">Habits today</span>
+                </SectionHeading>
+                <Region state={day} what="today's habits" skeleton="h-32">
+                  {(d) => (
+                    <HabitProgress
+                      habits={d.habits}
+                      onLog={(habitId) => setLogging({ habitId })}
+                      onStart={(habitId) => {
+                        const h = d.habits.find((x) => x.id === habitId);
+                        if (h) start({ id: h.id, name: h.name });
+                      }}
+                      timerHabitId={timer?.habitId}
+                    />
+                  )}
+                </Region>
+              </Panel>
             </section>
 
             <section aria-labelledby="today-tasks" className="min-w-0">
-              <SectionHeading>
-                <span id="today-tasks">Tasks due today</span>
-              </SectionHeading>
-              <Region state={day} what="today's tasks" skeleton="h-32">
-                {(d) => (
-                  <>
-                    <TasksPanel date={d.date} />
-                    <OverduePanel today={d.date} />
-                  </>
-                )}
-              </Region>
+              <Panel className="h-full">
+                <SectionHeading>
+                  <span id="today-tasks">Tasks due today</span>
+                </SectionHeading>
+                <Region state={day} what="today's tasks" skeleton="h-32">
+                  {(d) => (
+                    <>
+                      <TasksPanel date={d.date} />
+                      <OverduePanel today={d.date} />
+                    </>
+                  )}
+                </Region>
+              </Panel>
             </section>
           </div>
 
-          <section className="mt-10" aria-labelledby="week-summary">
-            <SectionHeading>
-              <span id="week-summary">Week summary</span>
-            </SectionHeading>
-            <Region state={overview} what="this week's summary" skeleton="h-24">
-              {(o) => <StatRow o={o} />}
-            </Region>
+          <section aria-labelledby="week-summary">
+            <Panel>
+              <SectionHeading>
+                <span id="week-summary">Week summary</span>
+              </SectionHeading>
+              <Region state={overview} what="this week's summary" skeleton="h-24">
+                {(o) => <StatRow o={o} />}
+              </Region>
+            </Panel>
           </section>
 
-          <section className="mt-10" aria-labelledby="week-chart">
-            <SectionHeading>
-              <span id="week-chart">Minutes per day</span>
-            </SectionHeading>
-            <Region state={overview} what="the weekly chart" skeleton="h-56">
-              {(o) => <DayBars daily={o.daily} today={o.today} />}
-            </Region>
+          <section aria-labelledby="week-chart">
+            <Panel>
+              <SectionHeading>
+                <span id="week-chart">Minutes per day</span>
+              </SectionHeading>
+              <Region state={overview} what="the weekly chart" skeleton="h-56">
+                {(o) => <DayBars daily={o.daily} today={o.today} />}
+              </Region>
+            </Panel>
           </section>
 
-          <section className="mt-12" aria-labelledby="consistency">
-            <SectionHeading>
-              <span id="consistency">Consistency, last 26 weeks</span>
-            </SectionHeading>
-            <Region state={heatmap} what="your consistency history" skeleton="h-28">
-              {(h) => <Heatmap days={h.days} summary={h.streak} />}
-            </Region>
+          <section aria-labelledby="consistency">
+            <Panel>
+              <SectionHeading>
+                <span id="consistency">Consistency, last 26 weeks</span>
+              </SectionHeading>
+              <Region state={heatmap} what="your consistency history" skeleton="h-28">
+                {(h) => <Heatmap days={h.days} summary={h.streak} />}
+              </Region>
+            </Panel>
           </section>
-        </>
+        </div>
       )}
 
       <LogSessionDialog

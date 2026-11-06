@@ -41,9 +41,9 @@ export function TasksPanel({ date }: { date: string }) {
       ) : loadError ? (
         <LoadError what="these tasks" message={loadError} onRetry={() => void reload()} />
       ) : tasks && tasks.length > 0 ? (
-        <ul className="divide-y divide-line border-y border-line">
+        <ul className="divide-y divide-line">
           {tasks.map((t) => (
-            <li key={t.id} className="flex min-h-12 items-center gap-3 py-1">
+            <li key={t.id} className="flex min-h-12 items-center gap-2 py-2 first:pt-0 last:pb-0">
               <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-3">
                 <input
                   type="checkbox"
@@ -54,13 +54,14 @@ export function TasksPanel({ date }: { date: string }) {
                 <span className={t.status === 'DONE' ? 'text-muted line-through' : ''}>{t.title}</span>
               </label>
               {t.loggedMinutes > 0 && <span className="num text-sm text-muted">{formatMinutes(t.loggedMinutes)}</span>}
-              <button
+              <Button
+                variant="ghost"
+                className="px-3 text-muted hover:text-danger"
                 onClick={() => run(() => api(`/tasks/${t.id}`, { method: 'DELETE' }))}
                 aria-label={`Delete task ${t.title}`}
-                className="min-h-11 min-w-11 cursor-pointer rounded-md text-sm text-muted transition-colors duration-150 hover:bg-raised hover:text-danger"
               >
                 Delete
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
@@ -68,12 +69,14 @@ export function TasksPanel({ date }: { date: string }) {
         <EmptyState title="No tasks for this day">Add one below to plan what you will study.</EmptyState>
       )}
 
-      <form onSubmit={add} className="mt-3 flex gap-2" noValidate>
+      <form onSubmit={add} className="mt-3 flex flex-col gap-2 sm:flex-row" noValidate>
         <label className="sr-only" htmlFor={`new-task-${date}`}>
           New task
         </label>
         <TextInput id={`new-task-${date}`} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Learn database indexing" maxLength={200} />
-        <Button type="submit">Add task</Button>
+        <Button type="submit" variant="secondary" className="shrink-0">
+          Add task
+        </Button>
       </form>
       <div className="mt-2">
         <ErrorText>{error}</ErrorText>

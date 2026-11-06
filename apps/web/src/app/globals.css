@@ -1,51 +1,103 @@
 @import 'tailwindcss';
+@import '@heroui/styles';
 
 /*
  * DevTrack design tokens.
  * Use scene: a developer studying in the evening, dim room, glancing at numbers.
- * Cool near-black neutrals, one accent (green), warm-red only for destructive/error.
+ * Charcoal neutrals, one violet accent, green only for success, amber for warnings,
+ * red for errors and destructive actions. HeroUI owns the component layer; these
+ * variables theme it, and the legacy aliases keep existing utilities working.
  */
 :root {
   color-scheme: dark;
-  --canvas: #0e1114;
-  --surface: #14181c;
-  --raised: #1b2025;
-  --line: #262c33;
-  --line-strong: #343c45;
-  --fg: #e8ebee;
-  --muted: #9ba6b1;
-  --accent: #4cc38a;
-  --accent-ink: #07130d;
-  --danger: #ef8a80;
-  --heat-0: #171c21;
-  --heat-1: #1d3a2e;
-  --heat-2: #266549;
-  --heat-3: #35935f;
-  --heat-4: #4cc38a;
+
+  /* HeroUI theme */
+  --radius: 0.75rem;
+  --field-radius: 0.5rem;
+  --field-border-width: 1px;
+
+  --background: #0f1115;
+  --foreground: #f4f4f8;
+
+  --surface: #171920;
+  --surface-secondary: #1d2029;
+  --surface-tertiary: #242835;
+  --surface-hover: #20242e;
+  --overlay: #1b1e26;
+  --overlay-foreground: #f4f4f8;
+
+  --muted: #a3a8b5;
+  --border: #292d38;
+  --border-strong: #3a3f4e;
+  --separator: #232732;
+
+  --default: #242835;
+  --default-foreground: #f4f4f8;
+
+  --field-background: #111318;
+  --field-foreground: #f4f4f8;
+  --field-placeholder: #7f8594;
+  --field-border: #2d3240;
+
+  --accent: #a996ff;
+  --accent-foreground: #171126;
+  --accent-hover: #b9a9ff;
+  --accent-soft: color-mix(in oklab, var(--accent) 14%, transparent);
+  --accent-soft-foreground: #c9beff;
+  --accent-soft-hover: color-mix(in oklab, var(--accent) 20%, transparent);
+
+  --success: #5fd39a;
+  --success-foreground: #07130d;
+  --warning: #e7b45f;
+  --warning-foreground: #1c1405;
+  --danger: #f08a8a;
+  --danger-foreground: #1f0b0b;
+  --danger-soft: color-mix(in oklab, var(--danger) 14%, transparent);
+  --danger-soft-foreground: #f4b3b3;
+  --danger-soft-hover: color-mix(in oklab, var(--danger) 20%, transparent);
+
+  --focus: var(--accent);
+  --link: #c9beff;
+  --backdrop: rgb(5 6 10 / 0.72);
+
+  /* Legacy aliases: existing screens can keep their utility names. */
+  --canvas: var(--background);
+  --raised: var(--surface-secondary);
+  --line: var(--border);
+  --line-strong: var(--border-strong);
+  --fg: var(--foreground);
+  --accent-ink: var(--accent-foreground);
+
+  /* Violet contribution ramp (0 min, 1-29, 30-59, 60-119, 120+). */
+  --heat-0: #191b22;
+  --heat-1: #2a2350;
+  --heat-2: #453a86;
+  --heat-3: #6d5cc9;
+  --heat-4: #a996ff;
 }
 
 @theme inline {
-  --color-canvas: var(--canvas);
-  --color-surface: var(--surface);
-  --color-raised: var(--raised);
-  --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
-  --color-fg: var(--fg);
-  --color-muted: var(--muted);
-  --color-accent: var(--accent);
-  --color-accent-ink: var(--accent-ink);
-  --color-danger: var(--danger);
-  --font-sans: var(--font-plex-sans), ui-sans-serif, sans-serif;
+  --color-canvas: var(--background);
+  --color-raised: var(--surface-secondary);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-fg: var(--foreground);
+  --color-accent-ink: var(--accent-foreground);
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
 html {
-  background: var(--canvas);
+  background: var(--background);
 }
 
 body {
-  background: var(--canvas);
-  color: var(--fg);
+  min-height: 100dvh;
+  background-color: var(--background);
+  /* One restrained ambient wash, not a gradient system. */
+  background-image: radial-gradient(52rem 34rem at 100% -8%, color-mix(in oklab, var(--accent) 6%, transparent), transparent 72%);
+  background-attachment: fixed;
+  color: var(--foreground);
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.5;
@@ -54,7 +106,7 @@ body {
 
 ::selection {
   background: color-mix(in srgb, var(--accent) 35%, transparent);
-  color: var(--fg);
+  color: var(--foreground);
 }
 
 input,
@@ -63,7 +115,7 @@ textarea {
 }
 
 * {
-  scrollbar-color: var(--line-strong) transparent;
+  scrollbar-color: var(--border-strong) transparent;
 }
 
 .num {
@@ -72,13 +124,77 @@ textarea {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
+}
+
+/* HeroUI draws its own ring on these; a second outline would double it. */
+.button:focus-visible,
+.input:focus-visible {
+  outline: none;
 }
 
 h1,
 h2 {
   text-wrap: balance;
+}
+
+/* ---------------------------------------------------------------------------
+ * HeroUI component alignment
+ * Keep one radius family and one restrained elevation across every screen.
+ * ------------------------------------------------------------------------- */
+
+.button {
+  border-radius: var(--radius-md);
+}
+
+.button--secondary {
+  border: 1px solid var(--border);
+  --button-bg: var(--surface-secondary);
+  --button-bg-hover: var(--surface-tertiary);
+  --button-fg: var(--foreground);
+}
+
+.button--ghost {
+  --button-fg: var(--muted);
+}
+
+.button--ghost:hover,
+.button--ghost[data-hovered='true'] {
+  --button-fg: var(--foreground);
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.card--secondary {
+  background: var(--surface-secondary);
+}
+
+.card--transparent {
+  border: 0;
+  background: transparent;
+}
+
+.input {
+  border: 1px solid var(--field-border);
+  border-radius: var(--radius-md);
+}
+
+.modal__dialog {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--overlay);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.45);
+}
+
+.drawer__dialog {
+  background: var(--surface);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.45);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -91,5 +207,5 @@ h2 {
 }
 
 dialog::backdrop {
-  background: rgb(5 7 9 / 0.7);
+  background: rgb(5 6 10 / 0.72);
 }

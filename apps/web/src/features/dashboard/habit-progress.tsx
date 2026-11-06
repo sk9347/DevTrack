@@ -23,18 +23,18 @@ export function HabitProgress({ habits, onLog, onStart, timerHabitId }: Props) {
     );
   }
   return (
-    <ul className="divide-y divide-line border-y border-line">
+    <ul className="divide-y divide-line">
       {habits.map((h) => {
         const ratio = Math.min(1, h.minutes / h.dailyTargetMinutes);
         return (
-          <li key={h.id} className="flex min-h-16 items-center gap-2 py-2 sm:gap-4">
+          <li key={h.id} className="flex min-h-16 items-center gap-2 py-3 first:pt-0 last:pb-0 sm:gap-4">
             <span className="size-3 shrink-0 rounded-full" style={{ backgroundColor: h.color }} aria-hidden />
             <div className="min-w-0 flex-1">
-              <div className="flex items-baseline justify-between gap-3">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                 <p className="font-medium sm:truncate">{h.name}</p>
                 <p className="num shrink-0 text-sm text-muted">
                   {formatMinutes(h.minutes)} / {formatMinutes(h.dailyTargetMinutes)}
-                  {h.met && <span className="ml-2 text-accent">Met</span>}
+                  {h.met && <span className="ml-2 inline-flex rounded-full bg-success-soft px-2 py-0.5 font-sans text-xs font-medium text-success">Met</span>}
                 </p>
               </div>
               <div
@@ -43,7 +43,7 @@ export function HabitProgress({ habits, onLog, onStart, timerHabitId }: Props) {
                 aria-valuemin={0}
                 aria-valuemax={h.dailyTargetMinutes}
                 aria-valuenow={Math.min(h.minutes, h.dailyTargetMinutes)}
-                className="mt-2 h-1.5 overflow-hidden rounded-full bg-line-strong"
+                className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-tertiary"
               >
                 <div className="h-full rounded-full transition-[width] duration-300 ease-out" style={{ width: `${ratio * 100}%`, backgroundColor: h.color }} />
               </div>

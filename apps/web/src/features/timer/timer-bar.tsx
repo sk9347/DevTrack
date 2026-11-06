@@ -33,7 +33,7 @@ export function TimerBar() {
 
   const ms = elapsedMs(timer.startedAt, now);
   return (
-    <div className="sticky top-0 z-20 flex min-h-14 items-center gap-3 border-b border-line bg-surface px-5 md:px-8">
+    <div className="sticky top-16 z-20 flex min-h-16 flex-wrap items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur sm:px-6 lg:px-8">
       <span className="size-2.5 shrink-0 rounded-full bg-accent" aria-hidden />
       <span role="status" className="sr-only">
         Timer running for {timer.habitName}
@@ -41,8 +41,16 @@ export function TimerBar() {
       <p className="min-w-0 flex-1 truncate text-sm">
         <span className="font-medium">{timer.habitName}</span>
       </p>
-      {/* aria-live off: announcing every second would drown out the page */}
-      <span role="timer" aria-live="off" aria-label={`Elapsed time for ${timer.habitName}`} className="num text-lg">
+      {/* aria-live off: announcing every second would drown out the page.
+          The top-layer marker keeps this global status readable by assistive tech while a dialog is open,
+          without exposing the timer's buttons behind the modal. */}
+      <span
+        role="timer"
+        aria-live="off"
+        aria-label={`Elapsed time for ${timer.habitName}`}
+        className="num text-lg tracking-tight"
+        data-react-aria-top-layer="true"
+      >
         {formatClock(ms)}
       </span>
 

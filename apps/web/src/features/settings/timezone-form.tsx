@@ -49,7 +49,7 @@ export function TimezoneForm({ current }: { current: string }) {
         <button
           type="button"
           onClick={() => setValue(device)}
-          className="min-h-11 cursor-pointer text-sm text-accent underline-offset-2 hover:underline"
+          className="min-h-11 cursor-pointer rounded-sm text-sm text-accent underline-offset-2 transition-colors hover:text-accent-hover hover:underline"
         >
           Use this device&apos;s timezone ({device})
         </button>
@@ -59,7 +59,7 @@ export function TimezoneForm({ current }: { current: string }) {
         Save timezone
       </Button>
       {status && (
-        <p role="status" className="text-sm text-muted">
+        <p role="status" className="text-sm text-success">
           {status}
         </p>
       )}

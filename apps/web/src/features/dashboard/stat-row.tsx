@@ -15,11 +15,11 @@ export function StatRow({ o }: { o: Overview }) {
     { label: 'Habit completion', value: percent(o.habitCompletion) },
   ];
   return (
-    <dl className="grid grid-cols-2 gap-x-6 gap-y-5 border-y border-line py-5 md:grid-cols-4">
+    <dl className="grid grid-cols-2 gap-x-6 gap-y-5 md:grid-cols-4">
       {stats.map((s) => (
-        <div key={s.label}>
+        <div key={s.label} className="min-w-0">
           <dt className="text-sm text-muted">{s.label}</dt>
-          <dd className="mt-1 text-2xl font-medium tabular-nums">
+          <dd className="mt-1 text-2xl font-medium tabular-nums tracking-tight">
             {s.value}
             {s.note && <span className="block text-sm font-normal text-muted">{s.note}</span>}
           </dd>

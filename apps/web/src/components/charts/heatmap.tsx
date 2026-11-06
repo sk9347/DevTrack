@@ -127,7 +127,7 @@ export function Heatmap({ days, selected, onSelect, fit = false, summary }: Prop
                   aria-pressed={selected === d.date}
                   onClick={() => onSelect(d.date)}
                   style={style}
-                  className={`${common} cursor-pointer outline-offset-1 hover:ring-1 hover:ring-muted ${selected === d.date ? 'ring-2 ring-fg' : ''}`}
+                  className={`${common} cursor-pointer outline-offset-1 transition-shadow duration-150 hover:ring-1 hover:ring-accent/70 ${selected === d.date ? 'ring-2 ring-accent' : ''}`}
                 />
               ) : (
                 <div key={d.date} title={labelFor(d)} style={style} className={common} />

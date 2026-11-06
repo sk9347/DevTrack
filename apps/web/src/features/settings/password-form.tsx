@@ -58,7 +58,7 @@ export function PasswordForm() {
         Change password
       </Button>
       {status && (
-        <p role="status" className="text-sm text-muted">
+        <p role="status" className="text-sm text-success">
           {status}
         </p>
       )}

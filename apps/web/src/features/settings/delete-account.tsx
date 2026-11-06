@@ -40,11 +40,11 @@ export function DeleteAccount({ userId }: { userId: string }) {
 
   return (
     <div className="max-w-md">
-      <p className="text-sm text-muted">
+      <p className="text-sm leading-6 text-muted">
         Permanently deletes your account with all habits, tasks and study sessions. This cannot be undone. Download your data first if you want a copy.
       </p>
       {open ? (
-        <form onSubmit={confirm} noValidate aria-label="Delete account" className="mt-3 space-y-3">
+        <form onSubmit={confirm} noValidate aria-label="Delete account" className="mt-3 space-y-3 rounded-lg border border-danger/25 bg-danger-soft/30 p-4">
           <Field label="Your password">
             <TextInput type="password" autoComplete="current-password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} />
           </Field>
@@ -59,7 +59,7 @@ export function DeleteAccount({ userId }: { userId: string }) {
           </div>
         </form>
       ) : (
-        <Button variant="danger" className="mt-3 border border-line-strong" onClick={() => setOpen(true)}>
+        <Button variant="danger" className="mt-3" onClick={() => setOpen(true)}>
           Delete account
         </Button>
       )}

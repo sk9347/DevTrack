@@ -29,19 +29,19 @@ export function OverduePanel({ today }: { today: string }) {
     }
   }
 
-  if (loadError && !data) return <LoadError what="overdue tasks" message={loadError} onRetry={() => void reload()} className="mt-8" />;
+  if (loadError && !data) return <LoadError what="overdue tasks" message={loadError} onRetry={() => void reload()} className="mt-6" />;
   if (!data || data.length === 0) return null;
 
   const rows = all ? data : data.slice(0, SHOWN);
   const hidden = data.length - rows.length;
   return (
-    <section className="mt-8" aria-labelledby="overdue">
+    <section className="mt-6 border-t border-line pt-5" aria-labelledby="overdue">
       <SectionHeading>
         <span id="overdue">Overdue ({data.length})</span>
       </SectionHeading>
-      <ul className="divide-y divide-line border-y border-line">
+      <ul className="divide-y divide-line">
         {rows.map((t) => (
-          <li key={t.id} className="flex min-h-12 items-center gap-3 py-1">
+          <li key={t.id} className="flex min-h-12 items-center gap-2 py-2 first:pt-0 last:pb-0">
             <label className="flex min-h-11 min-w-0 flex-1 cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
@@ -54,7 +54,12 @@ export function OverduePanel({ today }: { today: string }) {
                 <span className="block text-xs text-muted">from {formatDay(t.dueDate)}</span>
               </span>
             </label>
-            <Button variant="ghost" onClick={() => run(() => api(`/tasks/${t.id}`, { method: 'PATCH', body: { dueDate: today } }))} aria-label={`Move ${t.title} to today`}>
+            <Button
+              variant="ghost"
+              className="px-3"
+              onClick={() => run(() => api(`/tasks/${t.id}`, { method: 'PATCH', body: { dueDate: today } }))}
+              aria-label={`Move ${t.title} to today`}
+            >
               Move to today
             </Button>
           </li>

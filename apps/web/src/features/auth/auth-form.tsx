@@ -43,10 +43,13 @@ export function AuthForm() {
 
   const isLogin = mode === 'login';
   return (
-    <div className="w-full max-w-sm">
-      <h1 className="text-2xl font-semibold">{isLogin ? 'Sign in to DevTrack' : 'Create your DevTrack account'}</h1>
+    <div className="w-full">
+      <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{isLogin ? 'Sign in to DevTrack' : 'Create your DevTrack account'}</h1>
+      <p className="mt-1 text-sm leading-6 text-muted">
+        {isLogin ? 'Pick up where you left off.' : 'Start with one habit and log the time you actually put in.'}
+      </p>
       {expired && (
-        <p role="status" className="mt-3 text-sm text-muted">
+        <p role="status" className="mt-3 rounded-lg border border-line bg-surface-secondary px-3 py-2 text-sm text-muted">
           Your session ended. Sign in again.
         </p>
       )}
@@ -70,7 +73,7 @@ export function AuthForm() {
             setMode(isLogin ? 'register' : 'login');
             setError(null);
           }}
-          className="cursor-pointer text-accent underline underline-offset-4 hover:brightness-110"
+          className="cursor-pointer rounded-sm text-accent underline underline-offset-4 transition-colors hover:text-accent-hover"
         >
           {isLogin ? 'Create an account' : 'Sign in'}
         </button>

@@ -10,12 +10,12 @@ export const metadata: Metadata = {
   description: 'Track daily learning, study time and consistency.',
 };
 
-export const viewport: Viewport = { themeColor: '#0e1114', width: 'device-width', initialScale: 1 };
+export const viewport: Viewport = { themeColor: '#0f1115', width: 'device-width', initialScale: 1 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body>{children}</body>
+    <html lang="en" className={`dark ${sans.variable} ${mono.variable}`} data-theme="dark">
+      <body className="bg-background text-foreground">{children}</body>
     </html>
   );
 }

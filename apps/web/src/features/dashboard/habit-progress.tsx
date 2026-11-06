@@ -40,7 +40,7 @@ export function HabitProgress({ habits, onLog }: Props) {
                 aria-valuemin={0}
                 aria-valuemax={h.dailyTargetMinutes}
                 aria-valuenow={Math.min(h.minutes, h.dailyTargetMinutes)}
-                className="mt-2 h-1.5 overflow-hidden rounded-full bg-raised"
+                className="mt-2 h-1.5 overflow-hidden rounded-full bg-line-strong"
               >
                 <div className="h-full rounded-full transition-[width] duration-300 ease-out" style={{ width: `${ratio * 100}%`, backgroundColor: h.color }} />
               </div>

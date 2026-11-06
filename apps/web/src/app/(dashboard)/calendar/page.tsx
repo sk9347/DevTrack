@@ -17,7 +17,7 @@ export default function CalendarPage() {
     <>
       <h1 className="text-2xl font-semibold">Calendar</h1>
       <p className="mt-1 text-sm text-muted">
-        Every cell is a day. Select one to see what you studied. {heatmap.data && <span className="num">Longest streak: {heatmap.data.streak.longest} days.</span>}
+        Every cell is a day. Select one to see what you studied. {heatmap.data && <span className="tabular-nums">Longest streak: {heatmap.data.streak.longest} days.</span>}
       </p>
       <ErrorText>{heatmap.error}</ErrorText>
 

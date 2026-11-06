@@ -8,7 +8,7 @@ export function DayDetail({ track, timeZone }: { track: DayTrack; timeZone?: str
     <section aria-label={`Details for ${formatDayLong(track.date)}`}>
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="text-lg font-semibold">{formatDayLong(track.date)}</h2>
-        <p className="num text-muted">{formatMinutes(track.totalMinutes)} studied</p>
+        <p className="tabular-nums text-muted">{formatMinutes(track.totalMinutes)} studied</p>
       </div>
 
       <h3 className="mb-2 mt-6 text-sm font-semibold uppercase tracking-wide text-muted">Sessions</h3>

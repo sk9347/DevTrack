@@ -14,7 +14,7 @@ export function StatRow({ o }: { o: Overview }) {
       {stats.map((s) => (
         <div key={s.label}>
           <dt className="text-sm text-muted">{s.label}</dt>
-          <dd className="num mt-1 text-2xl font-medium">{s.value}</dd>
+          <dd className="mt-1 text-2xl font-medium tabular-nums">{s.value}</dd>
         </div>
       ))}
     </dl>

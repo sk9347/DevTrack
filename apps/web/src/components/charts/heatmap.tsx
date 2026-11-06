@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { formatDay, formatMinutes } from '@/lib/format';
 import type { Heatmap as HeatmapData } from '@/types';
 
@@ -10,6 +10,8 @@ interface Props {
   onSelect?: (date: string) => void;
   /** Stretch cells to fill the container instead of using a fixed 16px cell. */
   fit?: boolean;
+  /** Streak figures, spoken in the read-only summary. */
+  summary?: { longest: number };
 }
 
 const LEVEL_BG = ['var(--heat-0)', 'var(--heat-1)', 'var(--heat-2)', 'var(--heat-3)', 'var(--heat-4)'];
@@ -18,6 +20,31 @@ const GAP = 3;
 
 export function labelFor(day: { date: string; minutes: number }) {
   return day.minutes > 0 ? `${formatDay(day.date)}: ${formatMinutes(day.minutes)} studied` : `${formatDay(day.date)}: no study logged`;
+}
+
+/** One sentence for assistive tech in place of hundreds of cells: what the grid says at a glance. */
+export function summaryFor(days: { minutes: number }[], longest?: number): string {
+  const weeks = Math.ceil(days.length / 7);
+  const active = days.filter((d) => d.minutes > 0).length;
+  const recent = days.slice(-7).reduce((sum, d) => sum + d.minutes, 0);
+  const parts = [`${active} active ${active === 1 ? 'day' : 'days'}`];
+  if (longest !== undefined) parts.push(`longest streak ${longest} ${longest === 1 ? 'day' : 'days'}`);
+  parts.push(`last 7 days ${formatMinutes(recent)}`);
+  return `Study activity, last ${weeks} ${weeks === 1 ? 'week' : 'weeks'}: ${parts.join(', ')}`;
+}
+
+/** Spatial arrow keys over a week-per-column grid: left/right change week, up/down change weekday. */
+export function nextIndex(i: number, key: string, count: number): number {
+  const clamp = (n: number) => Math.min(count - 1, Math.max(0, n));
+  switch (key) {
+    case 'ArrowRight': return i + 7 <= count - 1 ? i + 7 : i;
+    case 'ArrowLeft': return i - 7 >= 0 ? i - 7 : i;
+    case 'ArrowDown': return i % 7 === 6 ? i : clamp(i + 1);
+    case 'ArrowUp': return i % 7 === 0 ? i : clamp(i - 1);
+    case 'Home': return i - (i % 7);
+    case 'End': return clamp(i - (i % 7) + 6);
+    default: return i;
+  }
 }
 
 /** One label per month, placed on the first week column that starts in that month. */
@@ -38,8 +65,23 @@ export function monthLabels(days: { date: string }[]): { week: number; label: st
 }
 
 /** Contribution calendar: columns are weeks (Mon-Sun), rows are weekdays. `days` must start on a Monday. */
-export function Heatmap({ days, selected, onSelect, fit = false }: Props) {
+export function Heatmap({ days, selected, onSelect, fit = false, summary }: Props) {
   const scroller = useRef<HTMLDivElement>(null);
+  const grid = useRef<HTMLDivElement>(null);
+  const selectedIndex = selected ? days.findIndex((d) => d.date === selected) : -1;
+  // Roving tabindex: the whole grid is one tab stop, parked on the selected day (else today).
+  const [focusIndex, setFocusIndex] = useState(selectedIndex >= 0 ? selectedIndex : days.length - 1);
+  useEffect(() => {
+    if (selectedIndex >= 0) setFocusIndex(selectedIndex);
+  }, [selectedIndex]);
+
+  function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+    const to = nextIndex(focusIndex, e.key, days.length);
+    if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
+    e.preventDefault();
+    setFocusIndex(to);
+    grid.current?.querySelector<HTMLButtonElement>(`[data-i="${to}"]`)?.focus();
+  }
   const weeks = Math.ceil(days.length / 7);
 
   // Today is at the right edge; make sure the newest weeks are what the user sees first.
@@ -62,14 +104,24 @@ export function Heatmap({ days, selected, onSelect, fit = false }: Props) {
               </span>
             ))}
           </div>
-          <div className="grid grid-flow-col grid-rows-7" style={{ gridTemplateColumns: columns, gap: GAP }}>
-            {days.map((d) => {
+          <div
+            ref={grid}
+            className="grid grid-flow-col grid-rows-7"
+            style={{ gridTemplateColumns: columns, gap: GAP }}
+            {...(onSelect
+              ? { role: 'group', 'aria-label': 'Days. Arrow keys move between days, Enter selects.', onKeyDown }
+              : { role: 'img', 'aria-label': summaryFor(days, summary?.longest) })}
+          >
+            {days.map((d, i) => {
               const style = { backgroundColor: LEVEL_BG[d.level] };
               const common = 'aspect-square w-full rounded-[3px]';
               return onSelect ? (
                 <button
                   key={d.date}
                   type="button"
+                  data-i={i}
+                  tabIndex={i === focusIndex ? 0 : -1}
+                  onFocus={() => setFocusIndex(i)}
                   title={labelFor(d)}
                   aria-label={labelFor(d)}
                   aria-pressed={selected === d.date}
@@ -78,7 +130,7 @@ export function Heatmap({ days, selected, onSelect, fit = false }: Props) {
                   className={`${common} cursor-pointer outline-offset-1 hover:ring-1 hover:ring-muted ${selected === d.date ? 'ring-2 ring-fg' : ''}`}
                 />
               ) : (
-                <div key={d.date} role="img" title={labelFor(d)} aria-label={labelFor(d)} style={style} className={common} />
+                <div key={d.date} title={labelFor(d)} style={style} className={common} />
               );
             })}
           </div>

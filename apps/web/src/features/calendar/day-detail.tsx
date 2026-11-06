@@ -1,9 +1,28 @@
-import { EmptyState } from '@/components/ui/controls';
+'use client';
+
+import { useState } from 'react';
+import { Button, EmptyState, ErrorText } from '@/components/ui/controls';
+import { api, notifyMutated } from '@/lib/api-client';
 import { formatDayLong, formatMinutes, formatTime } from '@/lib/format';
 import type { DayTrack } from '@/types';
 
 /** The daily track for one date: what was studied, when, and what was planned. */
 export function DayDetail({ track, timeZone }: { track: DayTrack; timeZone?: string }) {
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  // A mistyped duration must be correctable, or "real durations" becomes "real durations plus typos".
+  async function remove(id: string) {
+    try {
+      await api(`/sessions/${id}`, { method: 'DELETE' });
+      setConfirming(null);
+      setError(null);
+      notifyMutated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not delete the session');
+    }
+  }
+
   return (
     <section aria-label={`Details for ${formatDayLong(track.date)}`}>
       <div className="flex items-baseline justify-between gap-4">
@@ -29,10 +48,25 @@ export function DayDetail({ track, timeZone }: { track: DayTrack; timeZone?: str
                 </p>
               </div>
               <p className="num">{formatMinutes(s.durationMinutes)}</p>
+              {confirming === s.id ? (
+                <div className="flex gap-1">
+                  <Button variant="danger" onClick={() => remove(s.id)}>
+                    Confirm delete
+                  </Button>
+                  <Button variant="ghost" onClick={() => setConfirming(null)}>
+                    Keep
+                  </Button>
+                </div>
+              ) : (
+                <Button variant="ghost" onClick={() => setConfirming(s.id)} aria-label={`Delete ${s.habitName} session, ${formatMinutes(s.durationMinutes)}`}>
+                  Delete
+                </Button>
+              )}
             </li>
           ))}
         </ul>
       )}
+      <ErrorText>{error}</ErrorText>
 
       {track.tasks.length > 0 && (
         <>

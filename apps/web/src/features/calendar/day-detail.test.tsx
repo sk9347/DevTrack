@@ -1,6 +1,12 @@
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 import { DayDetail } from './day-detail';
 import type { DayTrack } from '@/types';
+
+const api = vi.hoisted(() => vi.fn());
+const notifyMutated = vi.hoisted(() => vi.fn());
+vi.mock('@/lib/api-client', () => ({ api, notifyMutated }));
 
 const track = (patch: Partial<DayTrack> = {}): DayTrack => ({
   date: '2026-11-06', totalMinutes: 55, habits: [], tasks: [],
@@ -35,5 +41,25 @@ describe('DayDetail', () => {
     ] })} />);
     expect(screen.getByText('Done')).toBeInTheDocument();
     expect(screen.getByText('Not done')).toBeInTheDocument();
+  });
+
+  it('deletes a mistaken session only after an explicit confirm', async () => {
+    api.mockReset();
+    api.mockResolvedValue(undefined);
+    render(<DayDetail track={track()} timeZone="UTC" />);
+    await userEvent.click(screen.getByRole('button', { name: /Delete System Design session, 55m/ }));
+    expect(api).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: 'Confirm delete' }));
+    expect(api).toHaveBeenCalledWith('/sessions/s1', { method: 'DELETE' });
+    expect(notifyMutated).toHaveBeenCalled();
+  });
+
+  it('keeps the session when the user backs out', async () => {
+    api.mockReset();
+    render(<DayDetail track={track()} timeZone="UTC" />);
+    await userEvent.click(screen.getByRole('button', { name: /Delete System Design session/ }));
+    await userEvent.click(screen.getByRole('button', { name: 'Keep' }));
+    expect(api).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: /Delete System Design session/ })).toBeInTheDocument();
   });
 });

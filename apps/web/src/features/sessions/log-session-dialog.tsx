@@ -12,11 +12,13 @@ interface Props {
   habits: Pick<Habit, 'id' | 'name'>[];
   tasks?: Pick<Task, 'id' | 'title'>[];
   defaultHabitId?: string;
+  /** Called after a successful save so the page can confirm it. */
+  onSaved?: (saved: { habitId: string; minutes: number }) => void;
 }
 
 const QUICK = [15, 25, 45, 60];
 
-export function LogSessionDialog({ open, onClose, habits, tasks = [], defaultHabitId }: Props) {
+export function LogSessionDialog({ open, onClose, habits, tasks = [], defaultHabitId, onSaved }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const [habitId, setHabitId] = useState('');
   const [minutes, setMinutes] = useState('');
@@ -50,6 +52,7 @@ export function LogSessionDialog({ open, onClose, habits, tasks = [], defaultHab
     try {
       await api('/sessions', { method: 'POST', body: buildSessionPayload(form) });
       notifyMutated();
+      onSaved?.({ habitId, minutes: form.minutes });
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save the session');

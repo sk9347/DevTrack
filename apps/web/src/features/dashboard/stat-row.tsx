@@ -3,9 +3,14 @@ import type { Overview } from '@/types';
 
 /** Flat definition list, not a card mosaic: four numbers, read left to right. */
 export function StatRow({ o }: { o: Overview }) {
-  const stats = [
+  const stats: { label: string; value: string; note?: string }[] = [
     { label: 'This week', value: formatMinutes(o.totalMinutes) },
-    { label: 'Current streak', value: `${o.streak.current} ${o.streak.current === 1 ? 'day' : 'days'}` },
+    {
+      label: 'Current streak',
+      value: `${o.streak.current} ${o.streak.current === 1 ? 'day' : 'days'}`,
+      // A missed day resets the run, never the record: keep the best visible so "0 days" doesn't read as lost history.
+      note: o.streak.longest > o.streak.current ? `Best ${o.streak.longest} ${o.streak.longest === 1 ? 'day' : 'days'}` : undefined,
+    },
     { label: 'Tasks done', value: `${o.tasks.done}/${o.tasks.total}` },
     { label: 'Habit completion', value: percent(o.habitCompletion) },
   ];
@@ -14,7 +19,10 @@ export function StatRow({ o }: { o: Overview }) {
       {stats.map((s) => (
         <div key={s.label}>
           <dt className="text-sm text-muted">{s.label}</dt>
-          <dd className="mt-1 text-2xl font-medium tabular-nums">{s.value}</dd>
+          <dd className="mt-1 text-2xl font-medium tabular-nums">
+            {s.value}
+            {s.note && <span className="block text-sm font-normal text-muted">{s.note}</span>}
+          </dd>
         </div>
       ))}
     </dl>

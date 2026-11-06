@@ -24,4 +24,12 @@ describe('StatRow', () => {
     expect(screen.getByText('This week').nextSibling).toHaveTextContent('0m');
     expect(screen.getByText('Habit completion').nextSibling).toHaveTextContent('0%');
   });
+
+  it('keeps the best streak visible after a missed day, and hides it when current is the best', () => {
+    const { rerender } = render(<StatRow o={overview({ streak: { current: 0, longest: 9 } })} />);
+    expect(screen.getByText('Current streak').nextSibling).toHaveTextContent('0 days');
+    expect(screen.getByText('Best 9 days')).toBeInTheDocument();
+    rerender(<StatRow o={overview({ streak: { current: 9, longest: 9 } })} />);
+    expect(screen.queryByText(/^Best /)).not.toBeInTheDocument();
+  });
 });

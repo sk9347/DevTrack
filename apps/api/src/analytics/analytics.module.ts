@@ -56,7 +56,7 @@ export class AnalyticsService {
       }
     }
     const totalMinutes = daily.reduce((sum, d) => sum + d.minutes, 0);
-    const habitRows = habits.map((h) => habitSummary(h, sessions, user.timezone, from, to));
+    const habitRows = habits.map((h) => habitSummary(h, sessions, user.timezone, from, to, today));
 
     return {
       period,

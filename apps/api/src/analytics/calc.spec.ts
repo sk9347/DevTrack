@@ -95,6 +95,23 @@ describe('habitSummary', () => {
     expect(habitSummary(habit, [], 'UTC', '2026-10-08', '2026-11-06').targetDays).toBe(13); // round(3 * 30 / 7)
   });
 
+  it('judges a week in progress against the pace so far, not the finished week', () => {
+    // 3 days/week target, 30m/day. Mon-Wed elapsed (3 days): pace = round(3*3/7) = 1 day.
+    const sessions = [S('2026-11-02T10:00:00Z', 45)];
+    const r = habitSummary(habit, sessions, 'UTC', '2026-11-02', '2026-11-08', '2026-11-04');
+    expect(r.targetDays).toBe(3);
+    expect(r.paceDays).toBe(1);
+    expect(r.completion).toBe(1);
+    // The same data once the week is over is 1 of 3.
+    expect(habitSummary(habit, sessions, 'UTC', '2026-11-02', '2026-11-08', '2026-11-08').completion).toBeCloseTo(1 / 3);
+  });
+
+  it('never divides by a zero pace on the first day', () => {
+    const r = habitSummary(habit, [], 'UTC', '2026-11-02', '2026-11-08', '2026-11-02');
+    expect(r.paceDays).toBe(1);
+    expect(r.completion).toBe(0);
+  });
+
   it('ignores sessions that belong to other habits', () => {
     const r = habitSummary(habit, [S('2026-11-02T10:00:00Z', 90, 'other')], 'UTC', '2026-11-02', '2026-11-08');
     expect(r.minutes).toBe(0);

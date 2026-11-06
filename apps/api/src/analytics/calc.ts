@@ -75,18 +75,27 @@ export function heatLevel(minutes: number): 0 | 1 | 2 | 3 | 4 {
   return 4;
 }
 
+/**
+ * `targetDays` is the habit's goal for the whole period. `paceDays` is the share of it that is due so far
+ * (days elapsed up to `today`), so a mid-week check reads against where you should be, not the finished week.
+ * `completion` uses the pace, floored at one day so day one isn't judged against a zero target.
+ * With `today` omitted (or at/after `to`) the period is treated as over and pace equals the full target.
+ */
 export function habitSummary(
   habit: HabitLike,
   sessions: SessionLike[],
   timeZone: string,
   from: string,
   to: string,
+  today: string = to,
 ) {
   const mine = sessions.filter((s) => s.habitId === habit.id);
   const daily = buildDaily(mine, timeZone, from, to);
   const days = daily.length;
   const targetDays = Math.max(1, Math.round((habit.targetFrequency * days) / 7));
   const daysMet = daily.filter((d) => d.minutes >= habit.dailyTargetMinutes).length;
+  const elapsed = Math.min(days, Math.max(1, daily.filter((d) => d.date <= today).length));
+  const paceDays = Math.min(targetDays, Math.max(1, Math.round((habit.targetFrequency * elapsed) / 7)));
   return {
     habitId: habit.id,
     name: habit.name,
@@ -94,6 +103,7 @@ export function habitSummary(
     minutes: daily.reduce((sum, d) => sum + d.minutes, 0),
     daysMet,
     targetDays,
-    completion: Math.min(1, daysMet / targetDays),
+    paceDays,
+    completion: Math.min(1, daysMet / paceDays),
   };
 }

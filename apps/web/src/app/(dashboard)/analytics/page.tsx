@@ -60,7 +60,7 @@ export default function AnalyticsPage() {
                 <th className="py-2 font-medium">Habit</th>
                 <th className="py-2 text-right font-medium">Time</th>
                 <th className="py-2 text-right font-medium">Days met</th>
-                <th className="py-2 text-right font-medium">Completion</th>
+                <th className="py-2 text-right font-medium">On pace</th>
               </tr>
             </thead>
             <tbody>
@@ -72,7 +72,8 @@ export default function AnalyticsPage() {
                   </td>
                   <td className="num py-3 text-right">{formatMinutes(h.minutes)}</td>
                   <td className="num py-3 text-right">
-                    {h.daysMet}/{h.targetDays}
+                    {h.daysMet}/{h.paceDays}
+                    {h.paceDays < h.targetDays && <span className="ml-1.5 font-sans text-muted">of {h.targetDays}</span>}
                   </td>
                   <td className="num py-3 text-right">{percent(h.completion)}</td>
                 </tr>

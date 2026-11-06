@@ -148,6 +148,8 @@ describe('habits, tasks, sessions and the daily track', () => {
       expect(o.studyHours).toBe(1.5);
       expect(o.tasks).toEqual({ total: 2, done: 1 });
       expect(o.habits[0]).toMatchObject({ minutes: 90, daysMet: 1, targetDays: 3 });
+      expect(o.habits[0].paceDays).toBeGreaterThanOrEqual(1);
+      expect(o.habits[0].paceDays).toBeLessThanOrEqual(3);
       expect(o.streak.current).toBe(1);
 
       await agent.get(`${API}/analytics/overview?period=year`).expect(400);

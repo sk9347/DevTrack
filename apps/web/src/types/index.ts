@@ -53,7 +53,7 @@ export interface Overview {
   habitCompletion: number;
   streak: { current: number; longest: number };
   daily: { date: string; minutes: number; sessions: number; tasksDone: number }[];
-  habits: { habitId: string; name: string; color: string; minutes: number; daysMet: number; targetDays: number; completion: number }[];
+  habits: { habitId: string; name: string; color: string; minutes: number; daysMet: number; targetDays: number; paceDays: number; completion: number }[];
 }
 
 export interface Heatmap {

@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Button, EmptyState, ErrorText, Skeleton, TextInput } from '@/components/ui/controls';
+import { Button, EmptyState, ErrorText, LoadError, Skeleton, TextInput } from '@/components/ui/controls';
 import { api, notifyMutated } from '@/lib/api-client';
 import { formatMinutes } from '@/lib/format';
 import { useFetch } from '@/lib/use-fetch';
 import type { Task } from '@/types';
 
 export function TasksPanel({ date }: { date: string }) {
-  const { data: tasks, error: loadError, loading } = useFetch<Task[]>(`/tasks?date=${date}`);
+  const { data: tasks, error: loadError, loading, reload } = useFetch<Task[]>(`/tasks?date=${date}`);
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -39,7 +39,7 @@ export function TasksPanel({ date }: { date: string }) {
           <Skeleton className="h-11" />
         </div>
       ) : loadError ? (
-        <ErrorText>{loadError}</ErrorText>
+        <LoadError what="these tasks" message={loadError} onRetry={() => void reload()} />
       ) : tasks && tasks.length > 0 ? (
         <ul className="divide-y divide-line border-y border-line">
           {tasks.map((t) => (

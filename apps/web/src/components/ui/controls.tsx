@@ -73,3 +73,31 @@ export function EmptyState({ title, children }: { title: string; children?: Reac
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cx('animate-pulse rounded-md bg-raised', className)} aria-hidden />;
 }
+
+/** A failed load, in the footprint of the skeleton it replaces: what failed, why, and a way to retry. */
+export function LoadError({ what, message, onRetry, className }: { what: string; message: string; onRetry: () => void; className?: string }) {
+  return (
+    <div role="alert" className={cx('flex flex-col items-start gap-3 rounded-md border border-line-strong px-4 py-5', className)}>
+      <div>
+        <p className="font-medium">Couldn&apos;t load {what}</p>
+        <p className="mt-0.5 text-sm text-danger">{message}</p>
+      </div>
+      <Button variant="secondary" onClick={onRetry}>
+        Retry
+      </Button>
+    </div>
+  );
+}
+
+interface FetchState<T> {
+  data: T | null;
+  error: string | null;
+  reload: () => void | Promise<void>;
+}
+
+/** Skeleton while loading, LoadError with Retry when the first load failed, otherwise the data. */
+export function Region<T>({ state, what, skeleton, children }: { state: FetchState<T>; what: string; skeleton: string; children: (data: T) => ReactNode }) {
+  if (state.data) return <>{children(state.data)}</>;
+  if (state.error) return <LoadError what={what} message={state.error} onRetry={() => void state.reload()} className={skeleton.replace(/^h-/, 'min-h-')} />;
+  return <Skeleton className={skeleton.replace(/^h-/, 'min-h-')} />;
+}

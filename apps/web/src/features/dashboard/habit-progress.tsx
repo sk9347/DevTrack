@@ -6,9 +6,12 @@ import type { DayTrack } from '@/types';
 interface Props {
   habits: DayTrack['habits'];
   onLog?: (habitId: string) => void;
+  onStart?: (habitId: string) => void;
+  /** The habit currently being timed, if any: only one timer runs at a time. */
+  timerHabitId?: string | null;
 }
 
-export function HabitProgress({ habits, onLog }: Props) {
+export function HabitProgress({ habits, onLog, onStart, timerHabitId }: Props) {
   if (habits.length === 0) {
     return (
       <EmptyState title="No habits yet">
@@ -24,11 +27,11 @@ export function HabitProgress({ habits, onLog }: Props) {
       {habits.map((h) => {
         const ratio = Math.min(1, h.minutes / h.dailyTargetMinutes);
         return (
-          <li key={h.id} className="flex min-h-16 items-center gap-4 py-2">
+          <li key={h.id} className="flex min-h-16 items-center gap-2 py-2 sm:gap-4">
             <span className="size-3 shrink-0 rounded-full" style={{ backgroundColor: h.color }} aria-hidden />
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-3">
-                <p className="truncate font-medium">{h.name}</p>
+                <p className="font-medium sm:truncate">{h.name}</p>
                 <p className="num shrink-0 text-sm text-muted">
                   {formatMinutes(h.minutes)} / {formatMinutes(h.dailyTargetMinutes)}
                   {h.met && <span className="ml-2 text-accent">Met</span>}
@@ -45,11 +48,29 @@ export function HabitProgress({ habits, onLog }: Props) {
                 <div className="h-full rounded-full transition-[width] duration-300 ease-out" style={{ width: `${ratio * 100}%`, backgroundColor: h.color }} />
               </div>
             </div>
-            {onLog && (
-              <Button variant="secondary" onClick={() => onLog(h.id)} aria-label={`Log time for ${h.name}`}>
-                Log time
-              </Button>
-            )}
+            <div className="flex shrink-0 items-center gap-1">
+              {onStart &&
+                (timerHabitId === h.id ? (
+                  <span className="px-0.5 text-sm font-medium text-accent">Running</span>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    className="px-1.5 sm:px-4"
+                    onClick={() => onStart(h.id)}
+                    disabled={!!timerHabitId}
+                    title={timerHabitId ? 'Finish the running timer first' : undefined}
+                    aria-label={`Start timer for ${h.name}`}
+                  >
+                    Start
+                  </Button>
+                ))}
+              {onLog && (
+                <Button variant="secondary" className="px-3 sm:px-4" onClick={() => onLog(h.id)} aria-label={`Log time for ${h.name}`}>
+                  <span className="sm:hidden">Log</span>
+                  <span className="hidden sm:inline">Log time</span>
+                </Button>
+              )}
+            </div>
           </li>
         );
       })}

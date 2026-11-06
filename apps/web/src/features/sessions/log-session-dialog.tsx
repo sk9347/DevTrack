@@ -12,13 +12,17 @@ interface Props {
   habits: Pick<Habit, 'id' | 'name'>[];
   tasks?: Pick<Task, 'id' | 'title'>[];
   defaultHabitId?: string;
+  /** Prefill for the minutes field (the focus timer uses this). */
+  defaultMinutes?: number;
+  /** A short note shown above the fields, e.g. that the timer's time was capped. */
+  notice?: string;
   /** Called after a successful save so the page can confirm it. */
   onSaved?: (saved: { habitId: string; minutes: number }) => void;
 }
 
 const QUICK = [15, 25, 45, 60];
 
-export function LogSessionDialog({ open, onClose, habits, tasks = [], defaultHabitId, onSaved }: Props) {
+export function LogSessionDialog({ open, onClose, habits, tasks = [], defaultHabitId, defaultMinutes, notice, onSaved }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const [habitId, setHabitId] = useState('');
   const [minutes, setMinutes] = useState('');
@@ -32,7 +36,7 @@ export function LogSessionDialog({ open, onClose, habits, tasks = [], defaultHab
     if (!dialog) return;
     if (open && !dialog.open) {
       setHabitId(defaultHabitId ?? habits[0]?.id ?? '');
-      setMinutes('');
+      setMinutes(defaultMinutes ? String(defaultMinutes) : '');
       setTaskId('');
       setEndedAt(nowLocalInput());
       setError(null);
@@ -40,7 +44,7 @@ export function LogSessionDialog({ open, onClose, habits, tasks = [], defaultHab
     } else if (!open && dialog.open) {
       dialog.close();
     }
-  }, [open, defaultHabitId, habits]);
+  }, [open, defaultHabitId, defaultMinutes, habits]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -72,6 +76,8 @@ export function LogSessionDialog({ open, onClose, habits, tasks = [], defaultHab
         <h2 id="log-session-title" className="text-lg font-semibold">
           Log study time
         </h2>
+
+        {notice && <p className="text-sm text-muted">{notice}</p>}
 
         <Field label="Habit">
           <SelectInput value={habitId} onChange={(e) => setHabitId(e.target.value)}>

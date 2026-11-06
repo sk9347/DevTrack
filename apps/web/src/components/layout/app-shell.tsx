@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { api } from '@/lib/api-client';
+import { TimerBar } from '@/features/timer/timer-bar';
+import { TimerProvider } from '@/features/timer/timer-context';
 import { formatDayLong } from '@/lib/format';
 import { useFetch } from '@/lib/use-fetch';
 import type { User } from '@/types';
@@ -48,6 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
+    <TimerProvider userId={data?.user.id}>
     <div className="min-h-dvh md:grid md:grid-cols-[14rem_1fr]">
       <aside className="hidden border-r border-line bg-surface md:flex md:flex-col">
         <p className="px-6 pb-6 pt-6 text-lg font-semibold tracking-tight">
@@ -71,6 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         </header>
+        <TimerBar />
         <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 md:px-8">{children}</main>
       </div>
 
@@ -78,5 +82,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <NavLinks orientation="bottom" />
       </nav>
     </div>
+    </TimerProvider>
   );
 }

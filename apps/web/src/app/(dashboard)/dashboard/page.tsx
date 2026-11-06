@@ -8,6 +8,7 @@ import { FirstRun } from '@/features/dashboard/first-run';
 import { HabitProgress } from '@/features/dashboard/habit-progress';
 import { StatRow } from '@/features/dashboard/stat-row';
 import { LogSessionDialog } from '@/features/sessions/log-session-dialog';
+import { useTimer } from '@/features/timer/timer-context';
 import { OverduePanel } from '@/features/tasks/overdue-panel';
 import { TasksPanel } from '@/features/tasks/tasks-panel';
 import { formatMinutes } from '@/lib/format';
@@ -18,6 +19,7 @@ export default function DashboardPage() {
   const day = useFetch<DayTrack>('/analytics/day');
   const overview = useFetch<Overview>('/analytics/overview?period=week');
   const heatmap = useFetch<HeatmapData>('/analytics/heatmap?weeks=26');
+  const { timer, start } = useTimer();
   const [logging, setLogging] = useState<{ habitId?: string } | null>(null);
   const [logged, setLogged] = useState<{ habitId: string; minutes: number; before: number } | null>(null);
 
@@ -56,16 +58,24 @@ export default function DashboardPage() {
       ) : (
         <>
           <div className="mt-4 grid gap-10 lg:grid-cols-2">
-            <section aria-labelledby="today-habits">
+            <section aria-labelledby="today-habits" className="min-w-0">
               <SectionHeading>
                 <span id="today-habits">Habits today</span>
               </SectionHeading>
               <Region state={day} what="today's habits" skeleton="h-32">
-                {(d) => <HabitProgress habits={d.habits} onLog={(habitId) => setLogging({ habitId })} />}
+                {(d) => <HabitProgress
+                    habits={d.habits}
+                    onLog={(habitId) => setLogging({ habitId })}
+                    onStart={(habitId) => {
+                      const h = d.habits.find((x) => x.id === habitId);
+                      if (h) start({ id: h.id, name: h.name });
+                    }}
+                    timerHabitId={timer?.habitId}
+                  />}
               </Region>
             </section>
 
-            <section aria-labelledby="today-tasks">
+            <section aria-labelledby="today-tasks" className="min-w-0">
               <SectionHeading>
                 <span id="today-tasks">Tasks due today</span>
               </SectionHeading>

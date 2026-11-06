@@ -58,7 +58,7 @@ Selection is the accent at 35%, caret is the accent, scrollbars use `--line-stro
 
 | Screen | Job | First read |
 |--------|-----|------------|
-| Today | Check and log today | Habits today (D1), then tasks, then the week summary, chart and 26-week heatmap |
+| Today | Check and log today | Habits today (D1) with Start and Log time, then tasks with an Overdue block (hidden when empty), then the week summary, chart and 26-week heatmap |
 | Habits | Define what you study | Active habits with Edit and Archive; add form |
 | Tasks | Plan a day | Date switcher, task list, add |
 | Calendar | Look back | 53-week heatmap, selected day's sessions and tasks |
@@ -66,11 +66,11 @@ Selection is the accent at 35%, caret is the accent, scrollbars use `--line-stro
 
 ## Components
 
-`Button` (primary, secondary, ghost, danger), `Field` + `TextInput` + `SelectInput` (visible labels always, hint below the label), `SectionHeading`, `EmptyState`, `Skeleton`, `ErrorText`, `LoadError`, `Region`, `StatRow`, `HabitProgress`, `DayBars`, `Heatmap`, `DayDetail`, `FirstRun`, `LogSessionDialog` (native `<dialog>`). Reuse before adding; a new component needs a line here.
+`Button` (primary, secondary, ghost, danger), `Field` + `TextInput` + `SelectInput` (visible labels always, hint below the label), `SectionHeading`, `EmptyState`, `Skeleton`, `ErrorText`, `LoadError`, `Region`, `StatRow`, `HabitProgress`, `DayBars`, `Heatmap`, `DayDetail`, `FirstRun`, `OverduePanel`, `TimerBar` + `TimerProvider`, `LogSessionDialog` (native `<dialog>`). Reuse before adding; a new component needs a line here.
 
 ## Interaction rules
 
-**Destructive actions use an inline two-step**, never a modal: the row swaps its action for "Confirm {verb} / Keep" (archive a habit, delete a session).
+**Destructive actions use an inline two-step**, never a modal: the row swaps its action for "Confirm {verb} / Keep" (archive a habit, delete a session, discard a running timer).
 
 **State contract** (every data region):
 
@@ -81,6 +81,12 @@ Selection is the accent at 35%, caret is the accent, scrollbars use `--line-stro
 | Error | `LoadError`: "Couldn't load {what}", the reason, and Retry (D3). Never a skeleton on an error |
 | Success | live update in place; after saving a session an inline `role=status` line confirms it (D6) |
 | Stale session | cookie cleared, `/login` with "Your session ended. Sign in again." (D2) |
+
+**Overdue tasks:** unfinished tasks from earlier days appear in an Overdue block under the day's tasks. Nothing is moved automatically; each row offers "Move to today", or can be completed in place (completion keeps the planned due date, so analytics counts it on the day it was planned). More than 10: first 10, then "Show N more".
+
+**Focus timer:** one timer at a time, per user, kept in the browser (localStorage) and shown in a bar pinned under the header on every page. Elapsed time is always `now - startedAt`, never counted ticks, so sleep, refresh and background tabs cannot drift it. Stop opens the Log dialog prefilled (minutes rounded up, capped at 12h with a note); the timer is cleared only after the session is saved, so a failed save loses nothing. Discard asks for confirmation. The clock is `role=timer` with `aria-live=off`; a screen-reader-only status announces which habit is being timed.
+
+**Phones:** grid children that hold lists need `min-w-0`, or the page grows wider than the screen. Habit names wrap on phones instead of truncating.
 
 **Copy:** utility language. Say what happened and what to do. No exclamation marks, no scolding. A missed day shows "Best N days" beside "0 days" (D5); history is never erased.
 

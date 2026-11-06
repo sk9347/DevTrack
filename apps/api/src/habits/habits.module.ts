@@ -22,10 +22,10 @@ export class CreateHabitDto {
   @MaxLength(60)
   name: string;
 
-  @IsOptional() @IsInt() @Min(1) @Max(7)
+  @IsOptional() @IsInt({ message: 'Days a week must be between 1 and 7' }) @Min(1, { message: 'Days a week must be between 1 and 7' }) @Max(7, { message: 'Days a week must be between 1 and 7' })
   targetFrequency?: number;
 
-  @IsOptional() @IsInt() @Min(5) @Max(720)
+  @IsOptional() @IsInt({ message: 'Daily target must be between 5 and 720 minutes' }) @Min(5, { message: 'Daily target must be between 5 and 720 minutes' }) @Max(720, { message: 'Daily target must be between 5 and 720 minutes' })
   dailyTargetMinutes?: number;
 
   @IsOptional() @IsHexColor()
@@ -36,10 +36,10 @@ export class UpdateHabitDto {
   @IsOptional() @IsString() @MinLength(1) @MaxLength(60)
   name?: string;
 
-  @IsOptional() @IsInt() @Min(1) @Max(7)
+  @IsOptional() @IsInt({ message: 'Days a week must be between 1 and 7' }) @Min(1, { message: 'Days a week must be between 1 and 7' }) @Max(7, { message: 'Days a week must be between 1 and 7' })
   targetFrequency?: number;
 
-  @IsOptional() @IsInt() @Min(5) @Max(720)
+  @IsOptional() @IsInt({ message: 'Daily target must be between 5 and 720 minutes' }) @Min(5, { message: 'Daily target must be between 5 and 720 minutes' }) @Max(720, { message: 'Daily target must be between 5 and 720 minutes' })
   dailyTargetMinutes?: number;
 
   @IsOptional() @IsHexColor()

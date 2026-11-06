@@ -27,7 +27,9 @@ describe('habits, tasks, sessions and the daily track', () => {
       const habit = await makeHabit('System Design');
       expect(habit).toMatchObject({ name: 'System Design', targetFrequency: 5, isActive: true });
       await agent.post(`${API}/habits`).send({ name: '' }).expect(400);
-      await agent.post(`${API}/habits`).send({ name: 'x', targetFrequency: 9 }).expect(400);
+      const tooMany = await agent.post(`${API}/habits`).send({ name: 'x', targetFrequency: 9 }).expect(400);
+      expect(tooMany.body.message).toContain('Days a week must be between 1 and 7');
+      expect(JSON.stringify(tooMany.body)).not.toContain('targetFrequency');
 
       await agent.delete(`${API}/habits/${habit.id}`).expect(204);
       expect((await agent.get(`${API}/habits`).expect(200)).body).toHaveLength(0);

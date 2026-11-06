@@ -21,10 +21,14 @@ export function HabitsManager() {
   async function add(e: FormEvent) {
     e.preventDefault();
     if (!name.trim()) return setError('Give the habit a name');
+    const minutes = Number(dailyTargetMinutes);
+    const days = Number(targetFrequency);
+    if (!Number.isInteger(minutes) || minutes < 5 || minutes > 720) return setError('Daily target must be between 5 and 720 minutes');
+    if (!Number.isInteger(days) || days < 1 || days > 7) return setError('Days a week must be between 1 and 7');
     try {
       await api('/habits', {
         method: 'POST',
-        body: { name: name.trim(), color, dailyTargetMinutes: Number(dailyTargetMinutes), targetFrequency: Number(targetFrequency) },
+        body: { name: name.trim(), color, dailyTargetMinutes: minutes, targetFrequency: days },
       });
       setName('');
       setError(null);

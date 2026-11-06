@@ -47,4 +47,22 @@ describe('api', () => {
     expect(err).toBeInstanceOf(ApiError);
     expect(err.message).toMatch(/Cannot reach the server/);
   });
+
+  it('on a 401 from a signed-in page, clears the cookie via logout and goes to /login with a reason', async () => {
+    const assign = vi.fn();
+    vi.stubGlobal('window', { location: { pathname: '/dashboard', assign } });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 401, json: async () => ({ message: 'Unauthorized' }) })
+      .mockResolvedValue({ ok: true, status: 204, json: async () => null });
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(api('/analytics/day')).rejects.toMatchObject({ status: 401 });
+    await vi.waitFor(() => expect(assign).toHaveBeenCalledWith('/login?reason=expired'));
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/auth/logout', expect.objectContaining({ method: 'POST' }));
+  });
+
+  it('says the server is not responding for a bare 5xx (an API outage behind the proxy)', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 500, json: async () => { throw new Error('not json'); } }));
+    await expect(api('/analytics/day')).rejects.toMatchObject({ message: "The server isn't responding. Try again in a moment.", status: 500 });
+  });
 });

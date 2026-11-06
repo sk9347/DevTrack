@@ -11,6 +11,23 @@ export function errorMessage(body: unknown, fallback: string): string {
   return typeof m === 'string' && m ? m : fallback;
 }
 
+let ending = false;
+
+/**
+ * A 401 on a signed-in page means the token is stale (user gone, secret changed). The middleware keeps
+ * bouncing /login back to the dashboard while the cookie exists, so clear it first, then explain why.
+ */
+async function endSession() {
+  if (ending) return;
+  ending = true;
+  try {
+    await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin' });
+  } catch {
+    // Offline: still go to /login; the cookie is cleared on the next successful sign-in.
+  }
+  window.location.assign('/login?reason=expired');
+}
+
 export async function api<T = unknown>(path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
   let res: Response;
   try {
@@ -27,9 +44,10 @@ export async function api<T = unknown>(path: string, init: { method?: string; bo
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     if (res.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
-      window.location.assign('/login');
+      void endSession();
     }
-    throw new ApiError(errorMessage(body, `Request failed (${res.status})`), res.status);
+    const fallback = res.status >= 500 ? "The server isn't responding. Try again in a moment." : `Request failed (${res.status})`;
+    throw new ApiError(errorMessage(body, fallback), res.status);
   }
   return body as T;
 }

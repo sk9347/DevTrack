@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Button, ErrorText, Field, TextInput } from '@/components/ui/controls';
 import { api } from '@/lib/api-client';
 
@@ -12,6 +12,12 @@ export function AuthForm() {
   const [mode, setMode] = useState<Mode>('login');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [expired, setExpired] = useState(false);
+
+  // Read the query after mount so server and client render the same first paint.
+  useEffect(() => {
+    setExpired(new URLSearchParams(window.location.search).get('reason') === 'expired');
+  }, []);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,6 +45,11 @@ export function AuthForm() {
   return (
     <div className="w-full max-w-sm">
       <h1 className="text-2xl font-semibold">{isLogin ? 'Sign in to DevTrack' : 'Create your DevTrack account'}</h1>
+      {expired && (
+        <p role="status" className="mt-3 text-sm text-muted">
+          Your session ended. Sign in again.
+        </p>
+      )}
       <form onSubmit={submit} className="mt-6 space-y-4" noValidate>
         <Field label="Email">
           <TextInput name="email" type="email" autoComplete="email" required autoFocus />

@@ -62,4 +62,16 @@ describe('AuthForm', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('/api/v1/auth/register');
     expect(JSON.parse(fetchMock.mock.calls[0][1].body).timezone).toBe(Intl.DateTimeFormat().resolvedOptions().timeZone);
   });
+
+  it('explains why the user is back at sign-in after a stale session', async () => {
+    window.history.pushState({}, '', '/login?reason=expired');
+    render(<AuthForm />);
+    expect(await screen.findByRole('status')).toHaveTextContent('Your session ended. Sign in again.');
+    window.history.pushState({}, '', '/login');
+  });
+
+  it('shows no notice on a normal visit', () => {
+    render(<AuthForm />);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
 });

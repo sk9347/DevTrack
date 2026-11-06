@@ -25,7 +25,9 @@ export default function TasksPage() {
         <label className="sr-only" htmlFor="task-date">
           Date
         </label>
-        <TextInput id="task-date" type="date" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} className="w-auto" />
+        <div className="w-48">
+          <TextInput id="task-date" type="date" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
+        </div>
         <Button variant="secondary" onClick={() => setDate(shiftDay(date, 1))} aria-label="Next day">
           →
         </Button>

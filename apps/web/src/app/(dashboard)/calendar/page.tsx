@@ -22,7 +22,7 @@ export default function CalendarPage() {
       <ErrorText>{heatmap.error}</ErrorText>
 
       <div className="mt-6">
-        {heatmap.data ? <Heatmap days={heatmap.data.days} selected={selected ?? undefined} onSelect={setPicked} /> : <Skeleton className="h-32" />}
+        {heatmap.data ? <Heatmap fit days={heatmap.data.days} selected={selected ?? undefined} onSelect={setPicked} /> : <Skeleton className="h-32" />}
       </div>
 
       <div className="mt-10">{track.data ? <DayDetail track={track.data} /> : <Skeleton className="h-40" />}</div>

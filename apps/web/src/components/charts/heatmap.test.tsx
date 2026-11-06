@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
-import { Heatmap, labelFor } from './heatmap';
+import { Heatmap, labelFor, monthLabels } from './heatmap';
 
 const days = [
   { date: '2026-11-02', minutes: 0, level: 0 as const },
@@ -28,6 +28,20 @@ describe('Heatmap', () => {
     expect(screen.getByRole('button', { name: /Tue 3 Nov/ })).toHaveAttribute('aria-pressed', 'true');
     await userEvent.click(screen.getByRole('button', { name: /Wed 4 Nov/ }));
     expect(onSelect).toHaveBeenCalledWith('2026-11-04');
+  });
+
+  it('labels each month once, at the week column where it starts', () => {
+    // 6 weeks starting Mon 2026-09-28: Sep (partial, dropped as it collides), Oct 5, then Nov 2
+    const start = new Date('2026-09-28T00:00:00Z');
+    const many = Array.from({ length: 42 }, (_, i) => ({
+      date: new Date(start.getTime() + i * 86_400_000).toISOString().slice(0, 10),
+      minutes: 0,
+      level: 0 as const,
+    }));
+    const labels = monthLabels(many);
+    // Nov starts in the final column, where "Nov" would overflow the grid, so it is dropped too.
+    expect(labels.map((l) => l.label)).toEqual(['Oct']);
+    expect(labels.map((l) => l.week)).toEqual([1]);
   });
 
   it('labels a studied day with its duration', () => {

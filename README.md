@@ -11,6 +11,7 @@ Follows `DevTrack_Architecture_and_Implementation_Plan.pdf` (Next.js + NestJS + 
 | Habits (daily target minutes, days per week, archive) | done |
 | Tasks per day (done state, minutes logged per task) | done |
 | Study sessions (real duration, optional task link) | done |
+| Settings (timezone, password, CSV export, delete account) | done |
 | Daily track (`/analytics/day`), weekly + 30-day overview, streaks, heatmap | done |
 | Goals, roadmaps, topics, notes, Docker/NGINX deploy, AI features | not yet (PDF phases 3, 6, 7) |
 

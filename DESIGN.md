@@ -63,10 +63,11 @@ Selection is the accent at 35%, caret is the accent, scrollbars use `--line-stro
 | Tasks | Plan a day | Date switcher, task list, add |
 | Calendar | Look back | 53-week heatmap, selected day's sessions and tasks |
 | Analytics | Weekly check | Period switch, stat row, chart, per-habit table with "On pace" |
+| Settings | Own the account | Timezone, password, CSV downloads, delete account. Reached from the header (not the nav), so the nav stays at 5 items |
 
 ## Components
 
-`Button` (primary, secondary, ghost, danger), `Field` + `TextInput` + `SelectInput` (visible labels always, hint below the label), `SectionHeading`, `EmptyState`, `Skeleton`, `ErrorText`, `LoadError`, `Region`, `StatRow`, `HabitProgress`, `DayBars`, `Heatmap`, `DayDetail`, `FirstRun`, `OverduePanel`, `TimerBar` + `TimerProvider`, `LogSessionDialog` (native `<dialog>`). Reuse before adding; a new component needs a line here.
+`Button` (primary, secondary, ghost, danger), `Field` + `TextInput` + `SelectInput` (visible labels always, hint below the label), `SectionHeading`, `EmptyState`, `Skeleton`, `ErrorText`, `LoadError`, `Region`, `StatRow`, `HabitProgress`, `DayBars`, `Heatmap`, `DayDetail`, `FirstRun`, `OverduePanel`, `TimerBar` + `TimerProvider`, `TimezoneForm`, `PasswordForm`, `DataExport`, `DeleteAccount`, `LogSessionDialog` (native `<dialog>`). Reuse before adding; a new component needs a line here.
 
 ## Interaction rules
 
@@ -85,6 +86,8 @@ Selection is the accent at 35%, caret is the accent, scrollbars use `--line-stro
 **Overdue tasks:** unfinished tasks from earlier days appear in an Overdue block under the day's tasks. Nothing is moved automatically; each row offers "Move to today", or can be completed in place (completion keeps the planned due date, so analytics counts it on the day it was planned). More than 10: first 10, then "Show N more".
 
 **Focus timer:** one timer at a time, per user, kept in the browser (localStorage) and shown in a bar pinned under the header on every page. Elapsed time is always `now - startedAt`, never counted ticks, so sleep, refresh and background tabs cannot drift it. Stop opens the Log dialog prefilled (minutes rounded up, capped at 12h with a note); the timer is cleared only after the session is saved, so a failed save loses nothing. Discard asks for confirmation. The clock is `role=timer` with `aria-live=off`; a screen-reader-only status announces which habit is being timed.
+
+**Settings:** each section is one form with a visible label, its own error (`role=alert`) and a status line after the button. Changing the timezone warns that history is regrouped into the new timezone's days (a streak can shift) because days are bucketed at read time. A wrong current password or wrong delete-confirm password is answered with 400, never 401, because the web client treats every 401 as an ended session and signs the user out. Deleting the account uses the inline two-step (password, then "Confirm delete / Keep"), clears the local timer and does a full navigation to /login. CSV downloads are plain links the server serves as attachments; cells that start with = + - @ are prefixed with an apostrophe so a spreadsheet never runs them.
 
 **Phones:** grid children that hold lists need `min-w-0`, or the page grows wider than the screen. Habit names wrap on phones instead of truncating.
 

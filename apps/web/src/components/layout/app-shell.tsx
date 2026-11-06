@@ -40,6 +40,8 @@ function NavLinks({ orientation }: { orientation: 'side' | 'bottom' }) {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const onSettings = pathname.startsWith('/settings');
   const { data } = useFetch<{ user: User }>('/auth/me');
   const today = useFetch<{ date: string }>('/analytics/day');
 
@@ -64,8 +66,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-w-0 flex-col pb-14 md:pb-0">
         <header className="flex min-h-14 items-center justify-between gap-4 border-b border-line px-5 md:px-8">
           <p className="text-sm text-muted">{today.data ? formatDayLong(today.data.date) : ' '}</p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3">
             <span className="hidden max-w-48 truncate text-sm text-muted sm:inline">{data?.user.email}</span>
+            <Link
+              href="/settings"
+              aria-current={onSettings ? 'page' : undefined}
+              className={`flex min-h-11 items-center rounded-md px-3 text-sm transition-colors duration-150 hover:bg-raised hover:text-fg ${onSettings ? 'bg-raised text-fg' : 'text-muted'}`}
+            >
+              Settings
+            </Link>
             <button
               onClick={signOut}
               className="min-h-11 cursor-pointer rounded-md px-3 text-sm text-muted transition-colors duration-150 hover:bg-raised hover:text-fg"

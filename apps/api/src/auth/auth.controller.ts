@@ -3,10 +3,12 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Injectable,
   Module,
+  Patch,
   Post,
   Res,
   UnauthorizedException,
@@ -18,7 +20,7 @@ import type { Response } from 'express';
 import { isValidTimeZone } from '../common/dates';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthGuard, AuthUser, COOKIE_NAME, CurrentUser } from './auth.guard';
-import { LoginDto, RegisterDto } from './auth.dto';
+import { ChangePasswordDto, DeleteAccountDto, LoginDto, RegisterDto, UpdateProfileDto } from './auth.dto';
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -45,6 +47,39 @@ export class AuthService {
       throw new UnauthorizedException('Incorrect email or password');
     }
     return this.session(user);
+  }
+
+  async updateTimezone(user: AuthUser, timezone: string) {
+    if (!isValidTimeZone(timezone)) throw new BadRequestException('Unknown timezone');
+    const updated = await this.prisma.user.update({ where: { id: user.id }, data: { timezone } });
+    return { id: updated.id, email: updated.email, timezone: updated.timezone };
+  }
+
+  /**
+   * A wrong password here is a 400, never a 401: the web client treats any 401 as "your session ended"
+   * and signs the user out.
+   */
+  private async requirePassword(userId: string, password: string, message: string) {
+    const row = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!row || !(await bcrypt.compare(password, row.passwordHash))) throw new BadRequestException(message);
+    return row;
+  }
+
+  async changePassword(user: AuthUser, dto: ChangePasswordDto) {
+    await this.requirePassword(user.id, dto.currentPassword, 'Current password is incorrect');
+    if (dto.newPassword === dto.currentPassword) {
+      throw new BadRequestException('New password must be different from the current one');
+    }
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: await bcrypt.hash(dto.newPassword, 10) },
+    });
+  }
+
+  /** Deletes the user; habits, tasks and sessions go with them through the schema's cascades. */
+  async deleteAccount(user: AuthUser, password: string) {
+    await this.requirePassword(user.id, password, 'Password is incorrect');
+    await this.prisma.user.delete({ where: { id: user.id } });
   }
 
   private async session(user: { id: string; email: string; timezone: string }) {
@@ -92,6 +127,31 @@ export class AuthController {
   @UseGuards(AuthGuard)
   me(@CurrentUser() user: AuthUser) {
     return { user };
+  }
+
+  @Patch('me')
+  @UseGuards(AuthGuard)
+  async updateMe(@CurrentUser() user: AuthUser, @Body() dto: UpdateProfileDto) {
+    return { user: await this.auth.updateTimezone(user, dto.timezone) };
+  }
+
+  @Post('password')
+  @UseGuards(AuthGuard)
+  @HttpCode(204)
+  changePassword(@CurrentUser() user: AuthUser, @Body() dto: ChangePasswordDto) {
+    return this.auth.changePassword(user, dto);
+  }
+
+  @Delete('me')
+  @UseGuards(AuthGuard)
+  @HttpCode(204)
+  async deleteMe(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: DeleteAccountDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.auth.deleteAccount(user, dto.password);
+    res.clearCookie(COOKIE_NAME, { path: '/' });
   }
 }
 

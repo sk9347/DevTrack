@@ -21,3 +21,23 @@ export class LoginDto {
   @IsString()
   password: string;
 }
+
+export class UpdateProfileDto {
+  @IsString({ message: 'Choose a timezone' })
+  timezone: string;
+}
+
+export class ChangePasswordDto {
+  @IsString()
+  currentPassword: string;
+
+  @IsString()
+  @MinLength(8, { message: 'New password must be at least 8 characters' })
+  @MaxLength(128, { message: 'New password must be at most 128 characters' })
+  newPassword: string;
+}
+
+export class DeleteAccountDto {
+  @IsString()
+  password: string;
+}

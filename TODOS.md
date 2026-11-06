@@ -1,19 +1,14 @@
 # TODOS
 
-Deferred product work from `/plan-ceo-review` (2026-11-06, SELECTIVE EXPANSION). Accepted and now built: carry-over tasks (overdue block) and the focus timer (see the CEO plan in `~/.gstack/projects/DevTrack/ceo-plans/`).
+Deferred product work from `/plan-ceo-review` (2026-11-06, SELECTIVE EXPANSION). Accepted and now built: carry-over tasks (overdue block), the focus timer (see the CEO plan in `~/.gstack/projects/DevTrack/ceo-plans/`) and the Settings screen.
 
 Deferred inside the timer: cross-device timers (needs server-side timer state).
+
+Deferred inside Settings: sessions on an old JWT stay valid after a password change (tokens are stateless, 7 days); fixing it needs a token version on the user. Email change and forgot-password need email sending.
 
 Effort is human-team / Claude Code.
 
 ## Deferred candidates
-
-### Settings screen (~2 days / 45 min)
-- **What:** a `/settings` page: change timezone, change password, export all data as CSV, delete account.
-- **Why:** today none of these are possible; the timezone is stored but cannot be edited, and users cannot leave with their data.
-- **Pros:** trust, basic expectations, unblocks "day starts at". **Cons:** needs a delete-account flow with safeguards.
-- **Context:** `User.timezone` exists in the schema; the API has no `PATCH /auth/me`.
-- **Depends on:** nothing.
 
 ### Session notes (~2 days / 45 min)
 - **What:** an optional "what I learned" field on each session, shown in the Calendar day detail.
@@ -26,7 +21,7 @@ Effort is human-team / Claude Code.
 - **Why:** developers study after midnight; today a session at 00:30 lands on the next day and can break a streak.
 - **Pros:** correctness for night owls. **Cons:** touches streak, heatmap and day bucketing, so needs the heaviest tests.
 - **Context:** `toLocalDate` in `apps/api/src/common/dates.ts` buckets by timezone midnight.
-- **Depends on:** Settings screen.
+- **Depends on:** Settings screen (built; the setting goes there next to Timezone).
 
 ### Weekly insight card (~2 days / 40 min)
 - **What:** plain-language summary ("Frontend: 0m this week. Your best day is Tuesday.") on Today and Analytics, computed from sessions, no AI.

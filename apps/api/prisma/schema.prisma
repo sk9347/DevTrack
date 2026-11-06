@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  TODO
+  DONE
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  timezone     String         @default("Asia/Kolkata")
+  createdAt    DateTime       @default(now())
+  habits       Habit[]
+  tasks        Task[]
+  sessions     StudySession[]
+}
+
+model Habit {
+  id                 String         @id @default(cuid())
+  name               String
+  // days per week the user commits to (1-7)
+  targetFrequency    Int            @default(5)
+  // minutes of real study that make a day count for this habit
+  dailyTargetMinutes Int            @default(30)
+  color              String         @default("#3ecf8e")
+  isActive           Boolean        @default(true)
+  userId             String
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions           StudySession[]
+  createdAt          DateTime       @default(now())
+
+  @@index([userId])
+}
+
+model Task {
+  id        String         @id @default(cuid())
+  title     String
+  dueDate   DateTime       @db.Date
+  status    TaskStatus     @default(TODO)
+  doneAt    DateTime?
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions  StudySession[]
+  createdAt DateTime       @default(now())
+
+  @@index([userId, dueDate])
+}
+
+model StudySession {
+  id              String   @id @default(cuid())
+  startedAt       DateTime
+  endedAt         DateTime
+  durationMinutes Int
+  habitId         String
+  habit           Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  taskId          String?
+  task            Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+
+  @@index([userId, startedAt])
+}

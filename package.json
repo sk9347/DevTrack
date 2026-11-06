@@ -1,0 +1,14 @@
+{
+  "name": "devtrack",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@12.16.1",
+  "scripts": {
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "dev:api": "pnpm --filter api start:dev",
+    "dev:web": "pnpm --filter web dev",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter api test:e2e"
+  }
+}

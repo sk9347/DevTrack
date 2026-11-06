@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: devtrack-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: devtrack
+      POSTGRES_PASSWORD: devtrack_dev
+      POSTGRES_DB: devtrack
+    ports:
+      - "5434:5432"
+    volumes:
+      - devtrack_data:/var/lib/postgresql/data
+
+volumes:
+  devtrack_data:

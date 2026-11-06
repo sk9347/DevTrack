@@ -1,0 +1,95 @@
+@import 'tailwindcss';
+
+/*
+ * DevTrack design tokens.
+ * Use scene: a developer studying in the evening, dim room, glancing at numbers.
+ * Cool near-black neutrals, one accent (green), warm-red only for destructive/error.
+ */
+:root {
+  color-scheme: dark;
+  --canvas: #0e1114;
+  --surface: #14181c;
+  --raised: #1b2025;
+  --line: #262c33;
+  --line-strong: #343c45;
+  --fg: #e8ebee;
+  --muted: #9ba6b1;
+  --accent: #4cc38a;
+  --accent-ink: #07130d;
+  --danger: #ef8a80;
+  --heat-0: #171c21;
+  --heat-1: #1d3a2e;
+  --heat-2: #266549;
+  --heat-3: #35935f;
+  --heat-4: #4cc38a;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-plex-sans), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html {
+  background: var(--canvas);
+}
+
+body {
+  background: var(--canvas);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--fg);
+}
+
+input,
+textarea {
+  caret-color: var(--accent);
+}
+
+* {
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+dialog::backdrop {
+  background: rgb(5 7 9 / 0.7);
+}

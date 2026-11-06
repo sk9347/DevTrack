@@ -54,11 +54,23 @@ export const taskView = (t: {
 });
 
 const withMinutes = { sessions: { select: { durationMinutes: true } } } as const;
+export const OVERDUE_LIMIT = 50;
 const asDate = (ymd: string) => new Date(`${ymd}T00:00:00Z`);
 
 @Injectable()
 export class TasksService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /** Unfinished tasks planned for a day before `before`: what quietly fell off the plan. Oldest first, capped. */
+  async overdue(userId: string, before: string) {
+    const tasks = await this.prisma.task.findMany({
+      where: { userId, status: TaskStatus.TODO, dueDate: { lt: asDate(before) } },
+      include: withMinutes,
+      orderBy: [{ dueDate: 'asc' }, { createdAt: 'asc' }],
+      take: OVERDUE_LIMIT,
+    });
+    return tasks.map(taskView);
+  }
 
   async list(userId: string, date?: string) {
     const tasks = await this.prisma.task.findMany({
@@ -106,8 +118,13 @@ export class TasksService {
 export class TasksController {
   constructor(private readonly tasks: TasksService) {}
 
-  @Get() list(@CurrentUser() u: AuthUser, @Query('date') date?: string) {
+  @Get() list(@CurrentUser() u: AuthUser, @Query('date') date?: string, @Query('overdueBefore') overdueBefore?: string) {
     if (date && !YMD.test(date)) throw new BadRequestException(DATE_MSG);
+    if (overdueBefore) {
+      if (!YMD.test(overdueBefore)) throw new BadRequestException('overdueBefore must be YYYY-MM-DD');
+      if (date) throw new BadRequestException('Use either date or overdueBefore, not both');
+      return this.tasks.overdue(u.id, overdueBefore);
+    }
     return this.tasks.list(u.id, date);
   }
   @Post() create(@CurrentUser() u: AuthUser, @Body() dto: CreateTaskDto) {

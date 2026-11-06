@@ -8,6 +8,7 @@ import { FirstRun } from '@/features/dashboard/first-run';
 import { HabitProgress } from '@/features/dashboard/habit-progress';
 import { StatRow } from '@/features/dashboard/stat-row';
 import { LogSessionDialog } from '@/features/sessions/log-session-dialog';
+import { OverduePanel } from '@/features/tasks/overdue-panel';
 import { TasksPanel } from '@/features/tasks/tasks-panel';
 import { formatMinutes } from '@/lib/format';
 import { useFetch } from '@/lib/use-fetch';
@@ -69,7 +70,12 @@ export default function DashboardPage() {
                 <span id="today-tasks">Tasks due today</span>
               </SectionHeading>
               <Region state={day} what="today's tasks" skeleton="h-32">
-                {(d) => <TasksPanel date={d.date} />}
+                {(d) => (
+                  <>
+                    <TasksPanel date={d.date} />
+                    <OverduePanel today={d.date} />
+                  </>
+                )}
               </Region>
             </section>
           </div>

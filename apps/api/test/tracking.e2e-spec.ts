@@ -67,6 +67,41 @@ describe('habits, tasks, sessions and the daily track', () => {
       expect(reopened.doneAt).toBeNull();
     });
 
+    it('overdue lists only unfinished tasks from before the date, oldest first', async () => {
+      const old = (await agent.post(`${API}/tasks`).send({ title: 'old', dueDate: addDays(today(), -3) })).body;
+      const older = (await agent.post(`${API}/tasks`).send({ title: 'older', dueDate: addDays(today(), -5) })).body;
+      const finished = (await agent.post(`${API}/tasks`).send({ title: 'finished', dueDate: addDays(today(), -2) })).body;
+      await agent.patch(`${API}/tasks/${finished.id}`).send({ status: 'DONE' });
+      await agent.post(`${API}/tasks`).send({ title: 'today', dueDate: today() });
+      await agent.post(`${API}/tasks`).send({ title: 'later', dueDate: addDays(today(), 2) });
+
+      const rows = (await agent.get(`${API}/tasks?overdueBefore=${today()}`).expect(200)).body;
+      expect(rows.map((r: any) => r.title)).toEqual(['older', 'old']);
+      expect(rows[0]).toMatchObject({ id: older.id, status: 'TODO', dueDate: addDays(today(), -5) });
+      expect(old.id).toBeDefined();
+    });
+
+    it('moving an overdue task to today takes it off the overdue list', async () => {
+      const t = (await agent.post(`${API}/tasks`).send({ title: 'slipped', dueDate: addDays(today(), -1) })).body;
+      await agent.patch(`${API}/tasks/${t.id}`).send({ dueDate: today() }).expect(200);
+      expect((await agent.get(`${API}/tasks?overdueBefore=${today()}`).expect(200)).body).toEqual([]);
+      expect((await agent.get(`${API}/tasks?date=${today()}`).expect(200)).body.map((r: any) => r.title)).toContain('slipped');
+    });
+
+    it("never shows another user's overdue tasks, and validates the query", async () => {
+      await agent.post(`${API}/tasks`).send({ title: 'mine', dueDate: addDays(today(), -1) });
+      const other = request.agent(app.getHttpServer());
+      await other.post(`${API}/auth/register`).send({ email: 'other-overdue@example.com', password: 'correct-horse' }).expect(201);
+      expect((await other.get(`${API}/tasks?overdueBefore=${today()}`).expect(200)).body).toEqual([]);
+      await agent.get(`${API}/tasks?overdueBefore=nope`).expect(400);
+      await agent.get(`${API}/tasks?overdueBefore=${today()}&date=${today()}`).expect(400);
+    });
+
+    it('caps the overdue list at 50', async () => {
+      for (let i = 0; i < 52; i++) await agent.post(`${API}/tasks`).send({ title: `t${i}`, dueDate: addDays(today(), -1) });
+      expect((await agent.get(`${API}/tasks?overdueBefore=${today()}`).expect(200)).body).toHaveLength(50);
+    });
+
     it('rejects malformed dates', async () => {
       await agent.post(`${API}/tasks`).send({ title: 'x', dueDate: '06/11/2026' }).expect(400);
       await agent.get(`${API}/tasks?date=nope`).expect(400);

@@ -17,7 +17,7 @@ export function Button({
     <button
       {...props}
       className={cx(
-        'inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-md px-4 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50',
+        'inline-flex min-h-11 cursor-pointer items-center whitespace-nowrap justify-center gap-2 rounded-md px-4 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50',
         styles,
         className,
       )}
